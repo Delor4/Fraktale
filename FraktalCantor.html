@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head lang="pl">
+    <meta charset="UTF-8">
+    <title>Zbiór Cantora</title>
+
+    <style>
+        canvas {
+            border: 1px dashed black;
+        }
+    </style>
+    <script>
+        var canvas,context;
+        var MainWidth=100;
+        var Stopien=1;
+        var Mnoznik=3;
+        var Odstep=1*Mnoznik;
+
+        function PaintCantor(endStopien, startX, endX, MaxStopien){
+            endStopien--;
+            var x1=startX+(endX-startX)/3;
+            var x2=endX-(endX-startX)/3;
+/*            if(endStopien<=0){
+                context.beginPath();
+                context.moveTo(startX,MaxStopien+1);
+                context.lineTo(x1,MaxStopien+1);
+                context.closePath();
+                context.stroke();
+                context.beginPath();
+                context.moveTo(x2,MaxStopien+1);
+                context.lineTo(endX,MaxStopien+1);
+                context.closePath();
+                context.stroke();
+            }else{
+*/
+            context.beginPath();
+                context.moveTo(startX,Odstep*((MaxStopien-endStopien)));
+                context.lineTo(x1,Odstep*((MaxStopien-endStopien)));
+                context.closePath();
+                context.stroke();
+                context.beginPath();
+                context.moveTo(x2,Odstep*((MaxStopien-endStopien)));
+                context.lineTo(endX,Odstep*((MaxStopien-endStopien)));
+                context.closePath();
+                context.stroke();
+            if(endStopien>=0){
+                PaintCantor(endStopien,startX,x1,MaxStopien);
+                PaintCantor(endStopien,x2,endX,MaxStopien);
+            }
+        }
+        var RePaint = function (){
+            canvas.width=Math.pow(3,Stopien+1);
+            canvas.height=(Stopien+2)*Odstep;
+            document.getElementById("sizeout").textContent=Math.floor(canvas.width)+"x"+Math.floor(canvas.height);
+            context.clearRect(0, 0, canvas.width, canvas.height);
+
+            context.fillStyle = "black";
+            PaintCantor(Stopien,0,canvas.width,Stopien);
+        };
+        function StopienUp(){
+            Stopien++;
+            Stopien=Stopien>8?8:Stopien;
+            ReStopien();
+        }
+        function StopienDown(){
+            Stopien--;
+            Stopien=Stopien<1?1:Stopien;
+            ReStopien();
+        }
+        function ReStopien(){
+            RePaint();
+            document.getElementById("StopienOut").textContent=Stopien;
+        }
+        window.onload = function() {
+            canvas = document.getElementById("drawingCanvas");
+            context = canvas.getContext("2d");
+
+            document.getElementById("odsize").onchange = function(){
+                Odstep=this.value*Mnoznik;
+                RePaint();
+            };
+            RePaint();
+
+        };
+    </script>
+</head>
+<body>
+<button onclick="StopienUp()">+</button> <button onclick="StopienDown()">-</button> Stopien: <span id="StopienOut">1</span><br>
+Rozmiar obrazu: (<span id="sizeout">800x800</span>)<br>
+Szerokość odstępu: <input type="range" id="odsize" min="1" max="25" value="1" step="1" ><br>
+<canvas id="drawingCanvas" width="500" height="300"></canvas>
+</body>
+</html>
