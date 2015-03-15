@@ -1,0 +1,410 @@
+﻿<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <title>Fraktal</title>
+
+  <style>
+canvas {
+  border: 1px dashed black;
+}
+	.linia{
+		display: inline-block;
+	}
+  </style>
+
+  <script>
+    var canvas,context;
+	var canvas2,context2;
+  var MainWidth=800;
+  var MainHeight=800;
+  var MainWidth2=400;
+  var MainHeight2=400;
+  var MainScaleX=1.0;
+  var MainScaleY=1.0;
+  var Stopien=1;
+  var Odstep=1;
+  var Kolor=false;
+  var kurx=0,kury=0;
+  var Ksztalt=0;
+  var needRecalculate=true;
+  var Przyciaganie=4;
+  
+  function Kat(_kat){
+	this.kat=_kat;
+	this.add=function(akat){
+		this.kat+=akat;
+		while(this.kat>(2*Math.PI)) this.kat-=Math.PI*2;
+		while(this.kat<0) this.kat+=Math.PI*2;
+	};
+	this.val=function(){
+		return this.kat;
+	}
+	
+	
+  }
+  function Wzor(){
+		this.katy=[Math.PI/2];
+		this.minx=0;
+		this.maxx=0;
+		this.miny=0;
+		this.maxy=0;
+		
+		this.add= function(kat){
+			this.katy.push(kat);
+			this.przelicz();
+		};
+		this.remove=function(){
+			if(this.katy.length>1){
+				this.katy.pop();
+				this.przelicz();
+			}
+		};
+		this.przelicz=function(){
+			var x=0;
+			var y=0;
+			var kat=new Kat(0);
+			var maxx=0,maxy=0,minx=0,miny=0;
+			for(var i=0;i<this.katy.length;i++){
+				kat.add(this.katy[i]);
+				x+=Math.sin(kat.val());
+				y-=Math.cos(kat.val());
+				if(x<minx) minx=x;
+				if(x>maxx) maxx=x;
+				if(y<miny) miny=y;
+				if(y>maxy) maxy=y;
+			}
+			this.minx=minx;
+			this.maxx=maxx;
+			this.miny=miny;
+			this.maxy=maxy;
+		};
+		this.przelicz();
+  }
+  function Fraktal(){
+		this.katy=[];
+		this.minx=0;
+		this.maxx=0;
+		this.miny=0;
+		this.maxy=0;
+		
+		this.add= function(kat){
+			this.katy.push(kat);
+		};
+		this.przelicz=function(){
+			var x=0;
+			var y=0;
+			var kat=new Kat(0);
+			var maxx=0,maxy=0,minx=0,miny=0;
+			for(var i=0;i<this.katy.length;i++){
+				kat.add(this.katy[i]);
+				x+=Math.sin(kat.val());
+				y-=Math.cos(kat.val());
+				if(x<minx) minx=x;
+				if(x>maxx) maxx=x;
+				if(y<miny) miny=y;
+				if(y>maxy) maxy=y;
+			}
+			this.minx=minx;
+			this.maxx=maxx;
+			this.miny=miny;
+			this.maxy=maxy;
+		}
+  }
+  
+  var ksztalty=[];
+  ksztalty[0]=[Math.PI/2,Math.PI/2,Math.PI/2,Math.PI/2];
+  ksztalty[1]=[2*Math.PI/3,2*Math.PI/3,2*Math.PI/3];
+  ksztalty[2]=[Math.PI/2,0,Math.PI/2,Math.PI/2,0,Math.PI/2];
+  ksztalty[3]=[2*Math.PI/5,2*Math.PI/5,2*Math.PI/5,2*Math.PI/5,2*Math.PI/5];
+  ksztalty[4]=[2*Math.PI/6,2*Math.PI/6,2*Math.PI/6,2*Math.PI/6,2*Math.PI/6,2*Math.PI/6];
+  
+  var wzor=new Wzor();
+  var fraktal=[];
+  
+  function FraktalShow(){
+	ReCalculate();
+	RePaint();
+  }
+  function ReCalculate(){
+	if(needRecalculate){
+		fraktal=[];
+		
+		var f=new Fraktal();
+		f.katy=ksztalty[Ksztalt];
+		//f.przelicz();
+		fraktal[0]=f;
+	}
+	for(i=1;i<=Stopien;i++){
+		if(fraktal.length<=i){
+			var x=new Fraktal();
+			for(j=0;j<fraktal[i-1].katy.length;j++){
+				x.add(fraktal[i-1].katy[j]);
+				for(k=1;k<wzor.katy.length;k++){
+					x.add(wzor.katy[k]);
+				}
+			}
+			x.przelicz();
+			fraktal[i]=x;
+			
+		}
+	}
+	needRecalcualte=false;
+	
+	
+  }
+  function WzorKasuj(){
+	wzor.remove();
+	needRecalcualte=true;
+	RePaint2();
+  }
+	function dl(x1,y1,x2,y2){	
+		return Math.sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1));
+	}
+	function rgb(r, g, b){
+		return "rgb("+Math.floor(r)+","+Math.floor(g)+","+Math.floor(b)+")";
+	}
+	function RysujWzor(cxt,katy,x1,y1,x2,y2,wspx,wspy){
+			
+			var x=0;
+			var y=0;
+			var xold=(x-x1)*wspx;
+			var yold=(y-y1)*wspy;//cxt.moveTo((x-x1)*wspx,(y-y1)*wspy);
+			var kat=new Kat(0);
+			for(var i=0;i<katy.length;i++){
+				kat.add(katy[i]);
+				x+=Math.sin(kat.val());
+				y-=Math.cos(kat.val());
+				cxt.beginPath();
+				cxt.moveTo(xold,yold);
+				xold=(x-x1)*wspx;
+				yold=(y-y1)*wspy;
+				cxt.lineTo(xold,yold);
+				cxt.closePath();
+				cxt.stroke();
+			}
+			
+			
+			return {'x':x,'y':y,'kat':kat.val()};
+		
+	}
+ 	var RePaint = function (){
+			canvas.width=MainWidth*MainScaleX;
+			canvas.height=MainHeight*MainScaleY;
+			//document.getElementById("sizeout").textContent=Math.floor(canvas.width)+"x"+Math.floor(canvas.height);
+			context.clearRect(0, 0, canvas.width, canvas.height);
+			
+			//context.save();
+			//context.scale(MainScaleX,MainScaleY);
+			
+			var x1=fraktal[Stopien].minx-1;
+			var y1=fraktal[Stopien].miny-1;
+			var x2=fraktal[Stopien].maxx+1;
+			var y2=fraktal[Stopien].maxy+1;
+			
+			var wspx=canvas.width/(x2-x1);
+			var wspy=canvas.height/(y2-y1);
+	
+			context.strokeStyle='black';
+			context.lineWidth=Odstep;
+			//context.lineCap='butt';
+			context.lineCap='square';
+			context.imageSmoothingEnabled=false;
+			RysujWzor(context,fraktal[Stopien].katy,x1,y1,x2,y2,wspx,wspy);
+		
+			//context.restore();
+	//		context.lineWidth=Odstep;
+	//		context.stroke();
+			
+		};
+	function Przyciagnij(kat){
+        var out=kat;
+        switch (Przyciaganie){
+            case 0:
+                break;
+            case 1:
+                    out=Math.round(kat*180/Math.PI)*Math.PI/180;
+                break;
+            case 2:
+                    out=Math.round(kat*36/Math.PI)*Math.PI/36;
+                break;
+            case 3:
+                    out=Math.round(kat*12/Math.PI)*Math.PI/12;
+                break;
+            case 4:
+                    out=Math.round(kat*4/Math.PI)*Math.PI/4;
+                break;
+            case 5:
+                    out=Math.round(kat*2/Math.PI)*Math.PI/2;
+                break;
+        }
+        return out;
+	}
+	function RePaint2(click){
+		if(click==null) click=false;
+		 
+
+		canvas2.width=MainWidth2;
+		canvas2.height=MainHeight2;
+		context2.clearRect(0, 0, canvas2.width, canvas2.height);
+		var x1=wzor.minx-1;
+		var y1=wzor.miny-1;
+		var x2=wzor.maxx+1;
+		var y2=wzor.maxy+1;
+		
+		//if(click) console.log(wzor);
+		
+		var wspx=canvas2.width/(x2-x1);
+		var wspy=canvas2.height/(y2-y1);
+	
+		//console.log(x1,y1,x2,y2);
+		//console.log(wzor,wspx,wspy);
+		context2.strokeStyle='black';
+		var c=RysujWzor(context2,wzor.katy,x1,y1,x2,y2,wspx,wspy);
+		
+		var fi=Math.atan2((kury) - ((c.y-y1)*wspy), (kurx) - ((c.x-x1)*wspx))+Math.PI/2;
+		while(fi>(2*Math.PI)) fi-=Math.PI*2;
+		while(fi<0) fi+=Math.PI*2;
+		fi=Przyciagnij(fi);
+		//document.getElementById("debug").textContent=(fi*180/Math.PI)+"°";
+		document.getElementById("DegresOut").textContent=(fi*180/Math.PI).toString().substr(0, 6)+"°";
+		//console.log(c,fi);
+		//console.log(kury, kurx);
+		//console.log((kury) + ((c.y+y1)*wspy), (kurx) - ((c.x-x1)*wspx));
+		var kat=fi-c.kat;
+		var x=c.x+Math.sin(fi);
+		var y=c.y-Math.cos(fi);
+		context2.beginPath();
+		context2.moveTo((c.x-x1)*wspx,(c.y-y1)*wspy);
+		//console.log((c.x-x1)*wspx,(c.y-y1)*wspy);
+		context2.lineTo((x-x1)*wspx,(y-y1)*wspy);
+		//console.log((x-x1)*wspx,(y-y1)*wspy);
+		context2.closePath();
+		context2.strokeStyle='red';
+		context2.stroke();
+		if(click) {
+			wzor.add(kat);
+			needRecalcualte=true;
+			RePaint2();
+		}
+	}
+	function StopienUp(){
+		Stopien++;
+		ReStopien();
+	}
+	function StopienDown(){
+		Stopien--;
+		Stopien=Stopien<1?1:Stopien;
+		ReStopien();
+	}
+	function ReStopien(){
+		//RePaint();
+		document.getElementById("StopienOut").textContent=Stopien;
+	}
+	function MouseMove(e){
+			 kurx=e.pageX - canvas2.offsetLeft;
+			 kury=e.pageY - canvas2.offsetTop;
+			RePaint2(false);
+	}
+	function Click(e){
+		//var x=e.pageX - canvas2.offsetLeft;
+		//var y=e.pageY - canvas2.offsetTop;
+		RePaint2(true);
+	}	
+window.onload = function() {
+  canvas = document.getElementById("drawingCanvas");
+  context = canvas.getContext("2d");
+	  
+	canvas2 = document.getElementById("drawingCanvas2");
+  context2 = canvas2.getContext("2d");
+	document.getElementById("xsize").onchange = function(){
+		MainScaleX=this.value;
+		document.getElementById("sizeout").textContent=Math.floor(MainWidth*MainScaleX)+"x"+Math.floor(MainHeight*MainScaleY);
+		//RePaint();
+	  };
+	document.getElementById("ysize").onchange = function(){
+		MainScaleY=this.value;
+		document.getElementById("sizeout").textContent=Math.floor(MainWidth*MainScaleX)+"x"+Math.floor(MainHeight*MainScaleY);
+		//RePaint();
+	  };
+	document.getElementById("odsize").onchange = function(){
+		Odstep=this.value;
+		//RePaint();
+	  };
+	  	//kliknië¤©a
+	canvas2.onclick=Click;
+	canvas2.onmousemove=MouseMove;
+	
+	//kształt
+	document.getElementById("ksz1").onchange = function(){
+		if(this.checked) Ksztalt=0;
+		needRecalcualte=true;
+	};
+	document.getElementById("ksz2").onchange = function(){
+		if(this.checked) Ksztalt=1;
+		needRecalcualte=true;
+	};
+	document.getElementById("ksz3").onchange = function(){
+		if(this.checked) Ksztalt=2;
+		needRecalcualte=true;
+	};
+	document.getElementById("ksz4").onchange = function(){
+		if(this.checked) Ksztalt=3;
+		needRecalcualte=true;
+	};
+	document.getElementById("ksz5").onchange = function(){
+		if(this.checked) Ksztalt=4;
+		needRecalcualte=true;
+	};
+	//Przyciąganie
+	document.getElementById("przyc0").onchange = function(){
+		if(this.checked) Przyciaganie=0;
+	};
+	document.getElementById("przyc1").onchange = function(){
+		if(this.checked) Przyciaganie=1;
+	};
+	document.getElementById("przyc2").onchange = function(){
+		if(this.checked) Przyciaganie=2;
+	};
+	document.getElementById("przyc3").onchange = function(){
+		if(this.checked) Przyciaganie=3;
+	};
+	document.getElementById("przyc4").onchange = function(){
+		if(this.checked) Przyciaganie=4;
+	};
+	document.getElementById("przyc5").onchange = function(){
+		if(this.checked) Przyciaganie=5;
+	};
+	//RePaint();
+	RePaint2();
+  
+};
+
+  </script>
+</head>
+<body>
+	<div>
+		<div class="linia">
+			<button onclick="StopienUp()">+</button> <button onclick="StopienDown()">-</button> Stopien: <span id="StopienOut">1</span><br>
+			x: <input type="range" id="xsize" min="0.5" max="5" value="1" step="0.1" > y: <input type="range" id="ysize" min="0.5" max="5" value="1" step="0.1" ><br>
+			Rozmiar obrazu: (<span id="sizeout">800x800</span>)<br>
+			Szerokość linii: <input type="range" id="odsize" min="1" max="100" value="1" step="1" ><br>
+		</div>
+		<div class="linia">
+			Wybierz kształt:<br>
+			<input id="ksz1" name="ksztalt" type="radio" checked>kwadrat<br>
+			<input id="ksz2" name="ksztalt" type="radio" >trókąt<br>
+			<input id="ksz3" name="ksztalt" type="radio" >prostokąt<br>
+			<input id="ksz4" name="ksztalt" type="radio" >pięciokąt<br>
+			<input id="ksz5" name="ksztalt" type="radio" >sześciokąt<br>
+		</div>
+		<div class="linia">
+			Przyciąganie: <input id="przyc0" name="przyc" type="radio">brak <input id="przyc1" name="przyc" type="radio">1° <input id="przyc2" name="przyc" type="radio">5° <input id="przyc3" name="przyc" type="radio">15° <input id="przyc4" name="przyc" type="radio" checked>45° <input id="przyc5" name="przyc" type="radio">90°<br>
+			<button onclick="WzorKasuj()">Kasuj</button> <span id="DegresOut">0</span><br>
+			<canvas id="drawingCanvas2" class="linia" width="400" height="400"></canvas>
+		</div>
+	</div>
+	<button onclick="FraktalShow()">Oblicz</button><br>
+  <canvas id="drawingCanvas" width="800" height="800"></canvas>
+</body>
+</html>

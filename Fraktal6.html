@@ -1,0 +1,145 @@
+﻿<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <title>Trójkąt Sierpińskiego</title>
+
+  <style>
+canvas {
+  border: 1px dashed black;
+}
+  </style>
+
+  <script>
+    var canvas,context;
+  var MainWidth=800;
+  var MainHeight=800;
+  var MainScaleX=1.0;
+  var MainScaleY=1.0;
+  var Stopien=1;
+  var Kolor=false;
+    var Odstep=0;
+
+	function dl(x1,y1,x2,y2){
+		
+		return Math.sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1));
+	}
+	function rgb(r, g, b){
+		
+		return "rgb("+Math.floor(r)+","+Math.floor(g)+","+Math.floor(b)+")";
+	}
+	var PaintTrojkat = function(stopien,x1,y1,x2,y2,x3,y3,r,g,b){
+	if(stopien==0){
+		
+			context.beginPath();
+			context.moveTo(x1,y1);
+			context.lineTo(x2,y2);
+			context.lineTo(x3,y3);	
+			context.closePath();
+			if(Kolor) context.fillStyle=rgb(r,g,b); else context.fillStyle = "black";
+			context.fill();
+	}else{
+		var x4=(x1+x2)/2;
+		var y4=(y1+y2)/2;
+
+		var x5=(x1+x3)/2;
+		var y5=(y1+y3)/2;
+
+		var x6=(x2+x3)/2;
+		var y6=(y2+y3)/2;
+
+		
+		var x7=x4+((x5-x4)*Odstep/200*stopien);
+		var y7=y4+((y6-y4)*Odstep/200*stopien);
+		var x8=x5-((x5-x4)*Odstep/200*stopien);
+		var y8=y7;
+		var x9=x6;
+		var y9=y6-((y6-y4)*Odstep/200*stopien);
+
+		stopien--;
+		
+		PaintTrojkat(stopien,x1,y1,x4,y4,x5,y5,r+(255/Stopien),g,b);
+		PaintTrojkat(stopien,x4,y4,x2,y2,x6,y6,r,g+(255/Stopien),b);
+		PaintTrojkat(stopien,x5,y5,x6,y6,x3,y3,r,g,b+(255/Stopien));
+		
+		
+		
+		context.beginPath();
+		context.fillStyle = "white";
+			context.moveTo(x7,y7);
+			context.lineTo(x8,y8);
+			context.lineTo(x9,y9);	
+		context.closePath();
+		context.fill()
+	
+	}
+};
+	
+ 	var RePaint = function (){
+			canvas.width=MainWidth*MainScaleX;
+			canvas.height=MainHeight*MainScaleY;
+			document.getElementById("sizeout").textContent=Math.floor(canvas.width)+"x"+Math.floor(canvas.height);
+			context.clearRect(0, 0, canvas.width, canvas.height);
+		
+			context.save();
+			context.scale(MainScaleX,MainScaleY);
+			context.fillStyle = "black";
+			
+			context.beginPath();
+			context.moveTo(MainWidth/2,0);
+			context.lineTo(0,MainHeight);
+			context.lineTo(MainWidth,MainHeight);	
+			context.closePath();
+			context.fill();
+			
+			PaintTrojkat(Stopien,MainWidth/2,0,0,MainHeight,MainWidth,MainHeight,0,0,0);
+			context.restore();
+		};
+	function StopienUp(){
+		Stopien++;
+		ReStopien();
+	}
+	function StopienDown(){
+		Stopien--;
+		Stopien=Stopien<1?1:Stopien;
+		ReStopien();
+	}
+	function ReStopien(){
+		RePaint();
+		document.getElementById("StopienOut").textContent=Stopien;
+	}
+window.onload = function() {
+  canvas = document.getElementById("drawingCanvas");
+  context = canvas.getContext("2d");
+
+	document.getElementById("cbKolor").onchange = function(){
+		Kolor=this.checked;
+		RePaint();
+	  };
+	  document.getElementById("xsize").onchange = function(){
+		MainScaleX=this.value;
+		RePaint();
+	  };
+	document.getElementById("ysize").onchange = function(){
+		MainScaleY=this.value;
+		RePaint();
+	  };
+document.getElementById("odsize").onchange = function(){
+		Odstep=this.value;
+		RePaint();
+	  };	  
+	RePaint();
+  
+};
+
+  </script>
+</head>
+
+<body>
+	<button onclick="StopienUp()">+</button> <button onclick="StopienDown()">-</button> Stopien: <span id="StopienOut">1</span> <input id="cbKolor" type="checkbox"> - Kolor <br>
+	x: <input type="range" id="xsize" min="0.5" max="5" value="1" step="0.1" > y: <input type="range" id="ysize" min="0.5" max="5" value="1" step="0.1" ><br>
+	Rozmiar obrazu: (<span id="sizeout">800x800</span>)<br>
+	Szerokość odstępu: <input type="range" id="odsize" min="0" max="25" value="0" step="1" ><br>
+  <canvas id="drawingCanvas" width="500" height="300"></canvas>
+</body>
+</html>
