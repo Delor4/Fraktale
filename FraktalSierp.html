@@ -23,9 +23,10 @@
                         var x1=Math.round(x+(width/2)-(y*.5));
                         var y1=y;
                         var z=4*((width*y1)+x1);
-                        data[z+3]=255;//czemu tu +3?? nie wiem ale nie działa przy +0
-                        data[z+1]=255;
-                        data[z+2]=255;
+                        data[z+0]=0;
+                        data[z+1]=0;
+                        data[z+2]=0;
+                        data[z+3]=255;//bo na początku obraz cały przezroczysty
                     }
                 }
             }
@@ -57,7 +58,7 @@
 </head>
 
 <body>
-Rozmiar: <input type="range" id="size" min="200" max="2000" value="800" step="1" ><br>
+Rozmiar: <input type="range" id="size" min="200" max="2048" value="800" step="1" ><br>
 Rozmiar obrazu: (<span id="sizeout">800x800</span>)<br>
 <canvas id="drawingCanvas" width="500" height="300"></canvas>
 </body>
