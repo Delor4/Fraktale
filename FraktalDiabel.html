@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head lang="pl">
+    <meta charset="UTF-8">
+    <title>Diabelskie schody</title>
+
+    <style>
+        canvas {
+            border: 1px dashed black;
+        }
+    </style>
+    <script>
+        var canvas,context;
+        var MainWidth=800;
+        var MainHeight=800;
+
+        function PaintDiabel(startX, endX, wysMin, wysMax,yMax){
+            var x1=startX+(endX-startX)/3;
+            var x2=endX-(endX-startX)/3;
+            if((x2-x1)>=1) {
+                var sr=wysMin+((wysMax-wysMin)/2);
+
+                PaintDiabel(startX,x1,sr,wysMax,yMax);
+
+                context.lineTo(x1,sr);
+                context.lineTo(x2,sr);
+
+                PaintDiabel(x2,endX,wysMin,sr,yMax);
+            }
+        }
+        var RePaint = function (){
+            canvas.width=MainWidth;
+            canvas.height=MainHeight;
+            document.getElementById("sizeout").textContent=Math.floor(canvas.width)+"x"+Math.floor(canvas.height);
+            context.clearRect(0, 0, canvas.width, canvas.height);
+
+            context.fillStyle = "black";
+            context.beginPath();
+            context.moveTo(0,canvas.height);
+            PaintDiabel(0,canvas.width,0,canvas.height,canvas.height);
+            context.lineTo(canvas.width,0);
+            context.lineTo(canvas.width,canvas.height);
+            context.closePath();
+            context.fill();
+        };
+        window.onload = function() {
+            canvas = document.getElementById("drawingCanvas");
+            context = canvas.getContext("2d");
+
+            document.getElementById("xsize").onchange = function(){
+                MainWidth=this.value;
+                RePaint();
+            };
+            document.getElementById("ysize").onchange = function(){
+                MainHeight=this.value;
+                RePaint();
+            };
+            RePaint();
+
+        };
+    </script>
+</head>
+<body>
+x: <input type="range" id="xsize" min="400" max="2500" value="800" step="1" > y: <input type="range" id="ysize" min="400" max="2000" value="800" step="1" ><br>
+Rozmiar obrazu: (<span id="sizeout">800x800</span>)<br>
+<canvas id="drawingCanvas" width="500" height="300"></canvas>
+</body>
+</html>
