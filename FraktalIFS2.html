@@ -23,7 +23,8 @@
         var Stopien=1;
 
         var Przeksztalcenie=0;
-
+        var imageData;
+        var data;
 
         function Kat(_kat){
             this.kat=_kat;
@@ -77,30 +78,26 @@
             return "rgb("+Math.floor(r)+","+Math.floor(g)+","+Math.floor(b)+")";
         }
 
-        function policzPrzekszt(prz,Kszt,przek){
-            //console.log("policzPrzekszt",prz,St,Kszt,przek,width);
-            var ksz=[];
-            for(var i=0;i<Kszt.length;i++){
-                var px=(Kszt[i].x*prz.a)+(Kszt[i].y*prz.b)+(prz.e);
-                var py=(Kszt[i].y*prz.d)+(Kszt[i].x*prz.c)+(prz.f);
-                ksz[i]=new Punkt(px,py);
-            }
-            RysujIFS(ksz,przek)
-        }
         function RysujIFS(Kszt,przek){
-            //console.log("RysujIFS",St,Kszt,przek,width);
             if((Math.abs(Kszt[0].x-Kszt[1].x)+Math.abs(Kszt[0].y-Kszt[1].y))>(2/MainWidth)){
                 for(var prz=0;prz<przek.length;prz++){
-                    policzPrzekszt(przek[prz],Kszt,przek);
+                    var ksz=[];
+                    for(var i=0;i<Kszt.length;i++){
+                        var px=(Kszt[i].x*przek[prz].a)+(Kszt[i].y*przek[prz].b)+(przek[prz].e);
+                        var py=(Kszt[i].y*przek[prz].d)+(Kszt[i].x*przek[prz].c)+(przek[prz].f);
+                        ksz[i]=new Punkt(px,py);
+                    }
+                    RysujIFS(ksz,przek);
                 }
             }else{
-                context.beginPath();
-                context.moveTo(Kszt[0].x*MainWidth,MainHeight-(Kszt[0].y*MainHeight));
-                for(var i=1;i<Kszt.length;i++){
-                    context.lineTo(Kszt[i].x*MainWidth,MainHeight-(Kszt[i].y*MainHeight));
-                }
-                context.closePath();
-                context.stroke();
+                var x=Math.round(MainWidth*(Kszt[0].x+Kszt[1].x)/2);
+                var y=Math.round(MainHeight-((Kszt[0].y+Kszt[1].y)*MainHeight/2));
+                var z1=4*((y*MainWidth)+x);
+                data[z1]=0;
+                data[z1+1]=0;
+                data[z1+2]=0;
+                data[z1+3]=255;
+
             }
         }
         var RePaint = function (){
@@ -109,21 +106,13 @@
             //document.getElementById("sizeout").textContent=Math.floor(canvas.width)+"x"+Math.floor(canvas.height);
             context.clearRect(0, 0, canvas.width, canvas.height);
 
-            //context.save();
-            //context.scale(MainWidth,MainHeight);
 
-            context.strokeStyle='black';
-            context.lineWidth=0.5;
-            //context.lineCap='butt';
-            //          context.lineCap='square';
-            //context.imageSmoothingEnabled=false;
-            //RysujWzor(context,fraktal[Stopien].katy,x1,y1,x2,y2,wspx,wspy);
+            context.imageSmoothingEnabled=false;
+
+            imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+            data = imageData.data;
             RysujIFS(ksztalt,przeksztalcenia[Przeksztalcenie]);
-
-            //context.restore();
-            //		context.lineWidth=Odstep;
-            //		context.stroke();
-
+            context.putImageData(imageData,0, 0);
         };
 
 
