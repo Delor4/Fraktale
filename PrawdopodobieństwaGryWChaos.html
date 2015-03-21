@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>Prawdopodobieństwa - obliczanie</title>
+
+    <script>
+        function Punkt(_x,_y){
+            this.x=_x;
+            this.y=_y;
+        }
+
+        function Przekształcenie(_a,_b,_c,_d,_e,_f, _p){
+            this.a=_a;
+            this.b=_b;
+            this.c=_c;
+            this.d=_d;
+            this.e=_e;
+            this.f=_f;
+            this.p=_p;
+        }
+
+        var przeksztalcenia=[];
+        przeksztalcenia[0]=[new Przekształcenie(0.5, 0 ,0 ,0.5, 0, 0, 0.333),new Przekształcenie(0.5, 0 ,0 ,0.5, 0.5, 0, 0.333),new Przekształcenie(0.5, 0 ,0 ,0.5, 0, 0.5, 0.334)];
+        przeksztalcenia[1]=[new Przekształcenie(0, -0.5 ,0.5 ,0, 0.5, 0, 0.333),new Przekształcenie(0, 0.5 , -0.5 ,0, 0.5, 0.5, 0.333),new Przekształcenie(0.5, 0 ,0 , 0.5, 0.25, 0.5, 0.334)];
+        przeksztalcenia[2]=[new Przekształcenie(0, 0.577 , -0.577 ,0, 0.0951, 0.5893, 0.333),new Przekształcenie(0, 0.577 , -0.577 ,0, 0.4413, 0.7893, 0.333),new Przekształcenie(0, 0.577 , -0.577 ,0, 0.0952, 0.9893, 0.333)];
+        przeksztalcenia[3]=[new Przekształcenie(0.336, 0 ,0 ,0.335, 0.333, 0.664, 0.333),new Przekształcenie(0, 0.333 , 1.0 ,0, 0.666, 0, 0.333),new Przekształcenie(0, -0.333 , 1.0 ,0, 0.333, 0, 0.333)];
+        przeksztalcenia[4]=[new Przekształcenie(0.387, 0.430 ,0.430 , -0.387, 0.256, 0.522, 0.333),new Przekształcenie(0.441, -0.091 ,-0.009 , -0.322, 0.4219, 0.5059, 0.333),new Przekształcenie(-0.468, 0.02 ,-0.113 ,0.015, 0.4, 0.4, 0.333)];
+        przeksztalcenia[5]=[new Przekształcenie(0.255, 0 ,0 ,0.255, 0.3726, 0.6714, 0.25),new Przekształcenie(0.255, 0 ,0 ,0.255, 0.1146, 0.2232, 0.25),new Przekształcenie(0.255, 0 ,0 ,0.255, 0.6306, 0.2232, 0.25),new Przekształcenie(0.370, -0.642 , 0.642 ,0.37, 0.6256, -0.0061, 0.25)];
+        przeksztalcenia[6]=[new Przekształcenie(0.382, 0 ,0 ,0.382, 0.3072, 0.6190, 0.2),new Przekształcenie(0.382, 0 ,0 ,0.382, 0.6033, 0.4044, 0.2),new Przekształcenie(0.382, 0 ,0 ,0.382, 0.0139, 0.4044, 0.2),new Przekształcenie(0.382, 0 ,0 ,0.382, 0.1253, 0.0595, 0.2),new Przekształcenie(0.382, 0 ,0 ,0.382, 0.4920, 0.0595, 0.2)];
+        przeksztalcenia[7]=[new Przekształcenie(0.195, -0.488 ,0.344 ,0.443, 0.4431, 0.2452, 0.2),new Przekształcenie(0.462, 0.414 ,-0.252 ,0.361, 0.2511, 0.5692, 0.2),new Przekształcenie(-0.058, -0.07 ,0.453 ,-0.111, 0.5976, 0.0969, 0.2),new Przekształcenie(-0.035, 0.07 ,-0.469 ,-0.022, 0.4884, 0.5069, 0.2),new Przekształcenie(-0.637, 0 ,0 ,0.501, 0.8562, 0.2513, 0.2)];
+        przeksztalcenia[8]=[new Przekształcenie(0.849, 0.037 , -0.037 ,0.849, 0.075, 0.1830, 0.7),new Przekształcenie(0.197, -0.226 ,0.226 ,0.169, 0.4, 0.049, 0.13),new Przekształcenie(-0.15, 0.283 ,0.26 ,0.237, 0.575, -0.084, 0.15),new Przekształcenie(0, 0 ,0 ,0.16, 0.5, 0, 0.02)];
+
+        function dl(x1,y1,x2,y2){
+            return Math.sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1));
+        }
+        function sk(x1,y1,x2,y2){
+            return (x1*x2)+(y1*y2);
+        }
+
+        function LiczPole(pr){
+            var p= [new Punkt(0,0),new Punkt(1,0),new Punkt(1,1),new Punkt(0,1)];
+            var p2=[];
+            for(var i=0;i< p.length;i++){
+                var px=(p[i].x*pr.a)+(p[i].y*pr.b)+(pr.e);
+                var py=(p[i].y*pr.d)+(p[i].x*pr.c)+(pr.f);
+                p2[i]=new Punkt(px,py);
+            }
+            var d1=dl(p2[0].x,p2[0].y,p2[2].x,p2[2].y);
+            var d2=dl(p2[1].x,p2[1].y,p2[3].x,p2[3].y);
+            var d=[];
+            d[0]=dl(p2[0].x,p2[0].y,p2[1].x,p2[1].y);
+            d[1]=dl(p2[1].x,p2[1].y,p2[2].x,p2[2].y);
+            d[2]=dl(p2[2].x,p2[2].y,p2[3].x,p2[3].y);
+            d[3]=dl(p2[3].x,p2[3].y,p2[0].x,p2[0].y);
+
+            cosfi=sk(p2[1].x-p2[0].x,p2[1].y-p2[0].y,p2[3].x-p2[0].x,p2[3].y-p2[0].y)/(d[0]*d[3]);
+            sinfi=Math.sqrt(1-(cosfi*cosfi));
+            pole=sinfi*d1*d2/2;
+            if(isNaN(pole)) pole=0;
+            return pole;
+        }
+        function Calculate(){
+            var out="";
+            for(var i=0;i<przeksztalcenia.length;i++){
+               out+="Przekształcenie "+i+":<br>";
+               var prz=przeksztalcenia[i];
+                var pole=[];
+                var suma=0;
+                for(var j=0;j<prz.length;j++){
+                    //out+="  Prz["+j+"]:<br>";
+                    pole[j]=LiczPole(prz[j]);
+                    suma+=pole[j];
+                    //out+="    Pole="+pole[j]+"<br>";
+                }
+                //out+="    Suma="+suma+"<br>";
+                var procent=[];
+                var done=false;
+                var k=0;
+                while(!done){
+                    if(k>=prz.length) break;
+
+                    procent[k]=pole[k]/suma ;
+                    if(procent[k]==0){
+                        pole[k]=suma*0.02;
+                        suma*=1.02;
+                        done=false;
+                        k=0;
+                        continue;
+                    }
+                    k++;
+                    //done=true;
+                }
+                for(var l=0;l<prz.length;l++){
+                    out+="    Prz["+l+"]: pole="+pole[l]+"  ("+procent[l]+"%)<br>";
+                }
+                out+="    Suma="+suma+"<br><br>";
+            }
+            document.getElementById("wynik").innerHTML=out;
+        }
+        window.onload = function(){
+
+            Calculate();
+        }
+    </script>
+</head>
+<body>
+<div id="wynik"></div>
+</body>
+</html>

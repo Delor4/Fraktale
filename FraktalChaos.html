@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="utf-8">
+    <title>Gra w chaos</title>
+
+    <style>
+        canvas {
+            border: 1px dashed black;
+        }
+        .linia{
+            display: inline-block;
+        }
+    </style>
+
+    <script>
+        var canvas,context;
+
+        var MainWidth=800;
+        var MainHeight=800;
+
+
+        var Stopien=1;
+
+        var Przeksztalcenie=0;
+        var imageData;
+        var data;
+        var needClean=true;
+
+        function Kat(_kat){
+            this.kat=_kat;
+            this.add=function(akat){
+                this.kat+=akat;
+                while(this.kat>(2*Math.PI)) this.kat-=Math.PI*2;
+                while(this.kat<0) this.kat+=Math.PI*2;
+            };
+            this.val=function(){
+                return this.kat;
+            }
+
+
+        }
+
+        function Punkt(_x,_y){
+            this.x=_x;
+            this.y=_y;
+        }
+
+        function Przekształcenie(_a,_b,_c,_d,_e,_f, _p){
+            this.a=_a;
+            this.b=_b;
+            this.c=_c;
+            this.d=_d;
+            this.e=_e;
+            this.f=_f;
+            this.p=_p;
+        }
+        var ksztalt=[new Punkt(0,0),new Punkt(1,1)];
+
+        var przeksztalcenia=[];
+        przeksztalcenia[0]=[new Przekształcenie(0.5, 0 ,0 ,0.5, 0, 0, 0.333),new Przekształcenie(0.5, 0 ,0 ,0.5, 0.5, 0, 0.333),new Przekształcenie(0.5, 0 ,0 ,0.5, 0, 0.5, 0.334)];
+        przeksztalcenia[1]=[new Przekształcenie(0, -0.5 ,0.5 ,0, 0.5, 0, 0.333),new Przekształcenie(0, 0.5 , -0.5 ,0, 0.5, 0.5, 0.333),new Przekształcenie(0.5, 0 ,0 , 0.5, 0.25, 0.5, 0.334)];
+        przeksztalcenia[2]=[new Przekształcenie(0, 0.577 , -0.577 ,0, 0.0951, 0.5893, 0.333),new Przekształcenie(0, 0.577 , -0.577 ,0, 0.4413, 0.7893, 0.333),new Przekształcenie(0, 0.577 , -0.577 ,0, 0.0952, 0.9893, 0.333)];
+        przeksztalcenia[3]=[new Przekształcenie(0.336, 0 ,0 ,0.335, 0.333, 0.664, 0.1),new Przekształcenie(0, 0.333 , 1.0 ,0, 0.666, 0, 0.45),new Przekształcenie(0, -0.333 , 1.0 ,0, 0.333, 0, 0.45)];
+        przeksztalcenia[4]=[new Przekształcenie(0.387, 0.430 ,0.430 , -0.387, 0.256, 0.522, 0.64),new Przekształcenie(0.441, -0.091 ,-0.009 , -0.322, 0.4219, 0.5059, 0.27),new Przekształcenie(-0.468, 0.02 ,-0.113 ,0.015, 0.4, 0.4, 0.09)];
+        przeksztalcenia[5]=[new Przekształcenie(0.255, 0 ,0 ,0.255, 0.3726, 0.6714, 0.09),new Przekształcenie(0.255, 0 ,0 ,0.255, 0.1146, 0.2232, 0.09),new Przekształcenie(0.255, 0 ,0 ,0.255, 0.6306, 0.2232, 0.09),new Przekształcenie(0.370, -0.642 , 0.642 ,0.37, 0.6256, -0.0061, 0.73)];
+        przeksztalcenia[6]=[new Przekształcenie(0.382, 0 ,0 ,0.382, 0.3072, 0.6190, 0.2),new Przekształcenie(0.382, 0 ,0 ,0.382, 0.6033, 0.4044, 0.2),new Przekształcenie(0.382, 0 ,0 ,0.382, 0.0139, 0.4044, 0.2),new Przekształcenie(0.382, 0 ,0 ,0.382, 0.1253, 0.0595, 0.2),new Przekształcenie(0.382, 0 ,0 ,0.382, 0.4920, 0.0595, 0.2)];
+        przeksztalcenia[7]=[new Przekształcenie(0.195, -0.488 ,0.344 ,0.443, 0.4431, 0.2452, 0.27),new Przekształcenie(0.462, 0.414 ,-0.252 ,0.361, 0.2511, 0.5692, 0.24),new Przekształcenie(-0.058, -0.07 ,0.453 ,-0.111, 0.5976, 0.0969, 0.06),new Przekształcenie(-0.035, 0.07 ,-0.469 ,-0.022, 0.4884, 0.5069, 0.11),new Przekształcenie(-0.637, 0 ,0 ,0.501, 0.8562, 0.2513, 0.31)];
+        przeksztalcenia[8]=[new Przekształcenie(0.849, 0.037 , -0.037 ,0.849, 0.075, 0.1830, 0.7),new Przekształcenie(0.197, -0.226 ,0.226 ,0.169, 0.4, 0.049, 0.13),new Przekształcenie(-0.15, 0.283 ,0.26 ,0.237, 0.575, -0.084, 0.15),new Przekształcenie(0, 0 ,0 ,0.16, 0.5, 0, 0.02)];
+        function FraktalShow(){
+            //ReCalculate();
+            RePaint();
+        }
+
+
+        function dl(x1,y1,x2,y2){
+            return Math.sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1));
+        }
+        function rgb(r, g, b){
+            return "rgb("+Math.floor(r)+","+Math.floor(g)+","+Math.floor(b)+")";
+        }
+
+        function RysujIFS(ilosc,przek){
+            var count=0;
+            var x=przek[0].e;
+            var y=przek[0].f;
+            var l,ls;
+            var nx,ny;
+            while(count<ilosc){
+                l=Math.random();
+                ls=0;
+                for(var prz=0;prz<przek.length;prz++) {
+                    ls+=przek[prz].p;
+                    if(l<ls){
+                        nx=(x*przek[prz].a)+(y*przek[prz].b)+(przek[prz].e);
+                        ny=(y*przek[prz].d)+(x*przek[prz].c)+(przek[prz].f);
+                        x=nx;
+                        y=ny;
+                        if(count<25) break; //kilka pierwszych punktów odrzucamy
+                        var z1=4*((Math.round(MainHeight-(y*MainHeight))*MainWidth)+Math.round(x*MainWidth));
+                        data[z1]=0;
+                        data[z1+1]=0;
+                        data[z1+2]=0;
+                        data[z1+3]=255;
+                        break;
+                    }
+                }
+                count++;
+            }
+        }
+        var RePaint = function (){
+
+            //document.getElementById("sizeout").textContent=Math.floor(canvas.width)+"x"+Math.floor(canvas.height);
+            //context.clearRect(0, 0, canvas.width, canvas.height);
+
+
+            //context.imageSmoothingEnabled=false;
+            if(needClean) {
+                //zmieniono rozmiar lub przekształcenie
+                canvas.width=MainWidth;
+                canvas.height=MainHeight;
+                context.clearRect(0, 0, canvas.width, canvas.height);
+
+                imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+                data = imageData.data;
+                needClean=false;
+            }
+            RysujIFS(100000,przeksztalcenia[Przeksztalcenie]);
+            context.putImageData(imageData,0, 0);
+        };
+
+
+        window.onload = function() {
+            canvas = document.getElementById("drawingCanvas");
+            context = canvas.getContext("2d");
+
+
+            document.getElementById("xsize").onchange = function(){
+                MainWidth=this.value;
+                MainHeight=this.value;
+                document.getElementById("sizeout").textContent=Math.floor(MainWidth)+"x"+Math.floor(MainHeight);
+                needClean=true;
+                //RePaint();
+            };
+
+            //Wybór przekształcenia
+            document.getElementById("pr1").onchange = function(){
+                if(this.checked) Przeksztalcenie=0;
+                needClean=true;
+            };
+            document.getElementById("pr2").onchange = function(){
+                if(this.checked) Przeksztalcenie=1;
+                needClean=true;
+            };
+            document.getElementById("pr3").onchange = function(){
+                if(this.checked) Przeksztalcenie=2;
+                needClean=true;
+            };
+            document.getElementById("pr4").onchange = function(){
+                if(this.checked) Przeksztalcenie=3;
+                needClean=true;
+            };
+            document.getElementById("pr5").onchange = function(){
+                if(this.checked) Przeksztalcenie=4;
+                needClean=true;
+            };
+            document.getElementById("pr6").onchange = function(){
+                if(this.checked) Przeksztalcenie=5;
+                needClean=true;
+            };
+            document.getElementById("pr7").onchange = function(){
+                if(this.checked) Przeksztalcenie=6;
+                needClean=true;
+            };
+            document.getElementById("pr8").onchange = function(){
+                if(this.checked) Przeksztalcenie=7;
+                needClean=true;
+            };
+            document.getElementById("pr9").onchange = function(){
+                if(this.checked) Przeksztalcenie=8;
+                needClean=true;
+            };
+            //RePaint();
+
+
+        };
+
+    </script>
+</head>
+<body>
+<div>
+    <div class="linia">
+        <input type="range" id="xsize" min="400" max="2000" value="800" step="1" >
+        Rozmiar obrazu: (<span id="sizeout">800x800</span>)<br>
+
+    </div>
+    <div class="linia">
+        Wybierz przekształcenie:<br>
+        <input id="pr1" name="przekszt" type="radio" checked>"Pochylony" trójkąt Sierpińskiego<br>
+        <input id="pr2" name="przekszt" type="radio">Choinka bliźniacza<br>
+        <input id="pr3" name="przekszt" type="radio">Smok fraktalny<br>
+        <input id="pr4" name="przekszt" type="radio">Labirynt Cantora<br>
+        <input id="pr5" name="przekszt" type="radio">Gałązka<br>
+        <input id="pr6" name="przekszt" type="radio">Kryształek 1<br>
+        <input id="pr7" name="przekszt" type="radio">Kryształek 2<br>
+        <input id="pr8" name="przekszt" type="radio">Drzewo<br>
+        <input id="pr9" name="przekszt" type="radio">Paprotka Barnsleya<br>
+    </div>
+
+</div>
+<button onclick="FraktalShow()">Oblicz</button><br>
+<canvas id="drawingCanvas" width="800" height="800"></canvas>
+</body>
+</html>
