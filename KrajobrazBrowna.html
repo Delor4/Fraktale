@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="utf-8">
+    <title>Krajobraz Browna</title>
+
+    <style>
+        canvas {
+            border: 1px dashed black;
+        }
+        .linia{
+            display: inline-block;
+        }
+    </style>
+
+    <script>
+        var canvas,context;
+
+        var MainWidth=800;
+        var MainHeight=800;
+
+        var Stopien=10;
+        var S=0.3;
+
+
+        function Punkt(_x,_y){
+            this.x=_x;
+            this.y=_y;
+        }
+
+        function FraktalShow(){
+            //ReCalculate();
+            RePaint();
+        }
+
+
+        function dl(x1,y1,x2,y2){
+            return Math.sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1));
+        }
+        function rgb(r, g, b){
+            return "rgb("+Math.floor(r)+","+Math.floor(g)+","+Math.floor(b)+")";
+        }
+
+        function RysujKrajobraz(stopien, x1, y1, x2, y2, height, context){
+            stopien--;
+            if(stopien<=0){
+                context.lineTo(x1,y1);
+                context.lineTo(x2,y2);
+            }else{
+                var xs=(x2+x1)/2;
+                var d=S*Math.sqrt(height*(x2-x1));
+                var r=Math.random()+Math.random()+Math.random()-1.5;
+                var ys=(r*d)+(y2+y1)/2;
+
+                RysujKrajobraz(stopien,x1,y1,xs,ys,height, context);
+                RysujKrajobraz(stopien,xs,ys,x2,y2,height, context);
+
+            }
+        }
+        var RePaint = function (){
+
+            //context.imageSmoothingEnabled=false;
+            canvas.width=MainWidth;
+            canvas.height=MainHeight;
+            context.clearRect(0, 0, canvas.width, canvas.height);
+
+            context.beginPath();
+            //var sty=canvas.height*Math.random();
+            var sty=canvas.height/2;
+            var eny=sty;
+            context.moveTo(0,sty);
+            RysujKrajobraz(Stopien, 0,sty,canvas.width,eny,canvas.height, context);
+            context.lineTo(canvas.width,sty);
+            context.closePath();
+            context.fill();
+        };
+
+
+        window.onload = function() {
+            canvas = document.getElementById("drawingCanvas");
+            context = canvas.getContext("2d");
+
+
+            document.getElementById("xsize").onchange = function(){
+                MainWidth=this.value;
+                MainHeight=this.value;
+                document.getElementById("sizeout").textContent=Math.floor(MainWidth)+"x"+Math.floor(MainHeight);
+
+            };
+            document.getElementById("sval").onchange = function(){
+                S=this.value;
+            }
+            document.getElementById("stval").onchange = function(){
+                Stopien=this.value;
+            }
+            RePaint();
+        };
+
+    </script>
+</head>
+<body>
+<div>
+    <div class="linia">
+        <input type="range" id="xsize" min="400" max="2000" value="800" step="1" >
+        Rozmiar obrazu: (<span id="sizeout">800x800</span>)<br>
+        s: <input type="range" id="sval" min="0.01" max="1" value="0.3" step="0.01" ><br>
+        stopien: s: <input type="range" id="stval" min="2" max="15" value="10" step="1" ><br>
+    </div>
+
+
+</div>
+<button onclick="FraktalShow()">Oblicz</button><br>
+<canvas id="drawingCanvas" width="800" height="400"></canvas>
+</body>
+</html>
