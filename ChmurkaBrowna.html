@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="utf-8">
+    <title>Chmurka Browna</title>
+
+    <style>
+        canvas {
+            border: 1px dashed black;
+        }
+        .linia{
+            display: inline-block;
+        }
+    </style>
+
+    <script>
+        var canvas,context;
+
+        var MainWidth=800;
+        var MainHeight=800;
+
+        var Stopien=8;
+        var S=0.8;
+        var tab;
+
+        function Punkt(_x,_y){
+            this.x=_x;
+            this.y=_y;
+        }
+
+        function FraktalShow(){
+            //ReCalculate();
+            RePaint();
+        }
+
+
+        function dl(x1,y1,x2,y2){
+            return Math.sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1));
+        }
+        function rgb(r, g, b){
+            return "rgb("+Math.floor(r)+","+Math.floor(g)+","+Math.floor(b)+")";
+        }
+
+        function RysujChmurke(stopien, krok, width, height, maxst){
+            //console.log("RysujChmurke(",stopien,krok,width, height, maxst,")");
+            stopien--;
+            if(stopien<=0){
+                //rysujemy chmurkę
+                for (var x1 = 0; x1 < maxst; x1++) {
+                    for (var y1 = 0; y1 < maxst; y1 ++) {
+                        var x2=x1+1;
+                        var y2=y1+1;
+                        var xs=(x1+x2)/2;
+                        var ys=(y1+y2)/2;
+                        context.beginPath();
+                        context.moveTo((width*x1/maxst)-1,(height*y1/maxst)-1);
+                        context.lineTo((width*xs/maxst)+1,(height*y1/maxst)-1);
+                        context.lineTo((width*xs/maxst)+1,(height*ys/maxst)+1);
+                        context.lineTo((width*x1/maxst)-1,(height*ys/maxst)+1);
+                        context.closePath();
+                        context.fillStyle=rgb(255*tab[x1][y1],255*tab[x1][y1],255);
+                        context.fill();
+
+                        context.beginPath();
+                        context.moveTo((width*xs/maxst)-1,(height*y1/maxst)-1);
+                        context.lineTo((width*x2/maxst)+1,(height*y1/maxst)-1);
+                        context.lineTo((width*x2/maxst)+1,(height*ys/maxst)+1);
+                        context.lineTo((width*xs/maxst)-1,(height*ys/maxst)+1);
+                        context.closePath();
+                        context.fillStyle=rgb(255*tab[x2][y1],255*tab[x2][y1],255);
+                        context.fill();
+
+                        context.beginPath();
+                        context.moveTo((width*xs/maxst)-1,(height*ys/maxst)-1);
+                        context.lineTo((width*x2/maxst)+1,(height*ys/maxst)-1);
+                        context.lineTo((width*x2/maxst)+1,(height*y2/maxst)+1);
+                        context.lineTo((width*xs/maxst)-1,(height*y2/maxst)+1);
+                        context.closePath();
+                        context.fillStyle=rgb(255*tab[x2][y2],255*tab[x2][y2],255);
+                        context.fill();
+
+                        context.beginPath();
+                        context.moveTo((width*x1/maxst)-1,(height*ys/maxst)-1);
+                        context.lineTo((width*xs/maxst)+1,(height*ys/maxst)-1);
+                        context.lineTo((width*xs/maxst)+1,(height*y2/maxst)+1);
+                        context.lineTo((width*x1/maxst)-1,(height*y2/maxst)+1);
+                        context.closePath();
+                        context.fillStyle=rgb(255*tab[x1][y2],255*tab[x1][y2],255);
+                        context.fill();
+                    }
+                }
+            }else {
+                //liczymy chmurkę
+                //faza 1
+                for (var x = krok; x < maxst; x += krok*2) {
+                    for (var y = krok; y < maxst; y += krok*2) {
+                        var d = S * Math.sqrt(krok / maxst);
+                        var r = Math.random() + Math.random() + Math.random() - 1.5;
+                        tab[x][y] = d * r + (tab[x - krok][y - krok] + tab[x - krok][y + krok] + tab[x + krok][y - krok] + tab[x + krok][y + krok]) / 4;
+                    }
+                }
+                //faza 2
+                for (var x = 0; x <= maxst; x += krok) {
+                    for (var y = 0; y <= maxst; y += krok) {
+                        if(tab[x][y]!==undefined) continue;
+                        var d = S * Math.sqrt(krok / maxst);
+                        var r = Math.random() + Math.random() + Math.random() - 1.5;
+                        var val = 0;
+                        var ile = 0;
+                        if ((x - krok) >= 0 ) {
+                            val += tab[x - krok][y];
+                            ile++;
+                        }
+                        if ((x + krok) <= maxst ) {
+                            val += tab[x + krok][y];
+                            ile++;
+                        }
+                        if ( (y + krok) <= maxst) {
+                            val += tab[x][y + krok];
+                            ile++;
+                        }
+                        if ((y - krok) >= 0) {
+                            val += tab[x][y - krok];
+                            ile++;
+                        }
+                        val /= ile;
+                        val += d * r;
+
+                        tab[x][y]=val;
+                    }
+                }
+                RysujChmurke(stopien,krok/2,width,height,maxst);
+            }
+        }
+
+        var RePaint = function (){
+
+            //context.imageSmoothingEnabled=false;
+            canvas.width=MainWidth;
+            canvas.height=MainHeight;
+            context.clearRect(0, 0, canvas.width, canvas.height);
+
+            tab=[];
+            for(var i=0;i<=Math.pow(2,Stopien-1);i++){
+                tab[i]=[];
+            }
+            tab[0][0]=0;
+            tab[0][Math.pow(2,Stopien-1)]=0;
+            tab[Math.pow(2,Stopien-1)][0]=0;
+            tab[Math.pow(2,Stopien-1)][Math.pow(2,Stopien-1)]=0;
+            //console.log(tab);
+            RysujChmurke(Stopien, Math.pow(2,Stopien-2),canvas.width,canvas.height, Math.pow(2,Stopien-1));
+
+        };
+
+
+        window.onload = function() {
+            canvas = document.getElementById("drawingCanvas");
+            context = canvas.getContext("2d");
+
+
+            document.getElementById("xsize").onchange = function(){
+                MainWidth=this.value;
+                MainHeight=this.value;
+                document.getElementById("sizeout").textContent=Math.floor(MainWidth)+"x"+Math.floor(MainHeight);
+
+            };
+            document.getElementById("sval").onchange = function(){
+                S=this.value;
+            };
+            document.getElementById("stval").onchange = function(){
+                Stopien=this.value;
+            };
+            RePaint();
+        };
+
+    </script>
+</head>
+<body>
+<div>
+    <div class="linia">
+        <input type="range" id="xsize" min="400" max="2000" value="800" step="1" >
+        Rozmiar obrazu: (<span id="sizeout">800x800</span>)<br>
+        s: <input type="range" id="sval" min="0.01" max="1" value="0.8" step="0.01" ><br>
+        stopien: s: <input type="range" id="stval" min="2" max="10" value="8" step="1" ><br>
+    </div>
+
+
+</div>
+<button onclick="FraktalShow()">Oblicz</button><br>
+<canvas id="drawingCanvas" width="800" height="400"></canvas>
+</body>
+</html>
