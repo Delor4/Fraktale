@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head lang="pl">
+    <meta charset="UTF-8">
+    <title>Wyspa Browna</title>
+
+    <script src="sylvester.js" type="text/javascript"></script>
+    <script src="glUtils.js" type="text/javascript"></script>
+    <script src="wyspaB.js" type="text/javascript"></script>
+
+    <!-- Fragment shader program -->
+
+    <script id="shader-fs" type="x-shader/x-fragment">
+    	varying lowp vec4 vColor;
+
+      void main(void) {
+        gl_FragColor = vColor;
+      }
+    </script>
+
+    <!-- Vertex shader program -->
+
+    <script id="shader-vs" type="x-shader/x-vertex">
+      attribute vec3 aVertexPosition;
+      attribute vec4 aVertexColor;
+
+      uniform mat4 uMVMatrix;
+      uniform mat4 uPMatrix;
+
+			varying lowp vec4 vColor;
+
+      void main(void) {
+        gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
+        vColor = aVertexColor;
+      }
+    </script>
+</head>
+<body>
+s: <input type="range" id="sval" min="0.01" max="1" value="0.8" step="0.01" ><br>
+stopien: s: <input type="range" id="stval" min="2" max="7" value="5" step="1" ><br>
+obrót: <input type="range" id="oval" min="0.0" max="360" value="0.0" step="1" ><br>
+woda: <input type="range" id="wval" min="-100" max="100" value="0" step="1" ><br>
+<button onclick="Oblicz()">Oblicz</button><br>
+<canvas id="glcanvas" width="640" height="480">
+    Your browser doesn't appear to support the HTML5 <code>&lt;canvas&gt;</code> element.
+</canvas>
+</body>
+</html>
