@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="utf-8">
+    <title>Grafika żółwia</title>
+
+    <style>
+        canvas {
+            border: 1px dashed black;
+        }
+        .linia{
+            display: inline-block;
+        }
+    </style>
+
+    <script>
+        var canvas,context;
+
+        var MainWidth=800;
+        var MainHeight=800;
+
+        var Stopien=1;
+        var podst=0;
+
+
+
+        function Kat(_kat){
+            this.kat=_kat;
+            this.add=function(akat){
+                this.kat+=akat;
+                while(this.kat>(2*Math.PI)) this.kat-=Math.PI*2;
+                while(this.kat<0) this.kat+=Math.PI*2;
+            };
+            this.val=function(){
+                return this.kat;
+            }
+
+
+        }
+
+        function Punkt(_x,_y){
+            this.x=_x;
+            this.y=_y;
+        }
+
+        var symbole={};
+        symbole["L"]="+F-F-F+";
+        symbole["R"]="-F+F+F-";
+        symbole["F"]="F";
+        symbole["+"]="+";
+        symbole["-"]="-";
+
+        var podstawiania=[];
+
+        podstawiania[0]={
+            "aksjomat":"L",
+            "kat":Math.PI/2,
+            "L":"+RF-LFL-FR+",
+            "R":"-LF+RFR+FL-",
+            "F":"F",
+            "+":"+",
+            "-":"-"
+        };
+        podstawiania[1]={
+            "aksjomat":"F+F+F+F",
+            "kat":Math.PI/2,
+            "F":"F+F-F-FF+F+F-F",
+            "+":"+",
+            "-":"-"
+        };
+        podstawiania[2]={
+            "aksjomat":"F",
+            "kat":Math.PI/2,
+            "F":"FfF",
+            "f":"fff"
+        };
+        podstawiania[3]={
+            "aksjomat":"F",
+            "kat":Math.PI/3,
+            "F":"F+F--F+F",
+            "+":"+",
+            "-":"-"
+        };
+
+        function FraktalShow(){
+            //ReCalculate();
+            RePaint();
+        }
+
+        function LiczPodstawienia(St,podst){
+            var wyn=[];
+            wyn[0]=podst.aksjomat;
+            for(var i=1;i<St;i++){
+                wyn[i]="";
+                for(var j=0;j<wyn[i-1].length;j++){
+                    wyn[i]+=podst[wyn[i-1][j]];
+                }
+            }
+            return wyn[St-1];
+        }
+        function LiczCiag(w){
+            var wyn="";
+            for(var j=0;j<w.length;j++){
+                wyn+=symbole[w[j]];
+            }
+            //console.log(wyn);
+            var done=false;
+            var wy=wyn;
+            while(!done){
+                wy=wy.replace("+-","");
+                wy=wy.replace("-+","");
+                if(wyn==wy) done=true;
+                wyn=wy;
+            }
+            return wyn;
+        }
+        function RysujCiagZolw(w,f,fun,p){
+            var x=0;
+            var y=0;
+            var fi=new Kat(Math.PI/2);
+
+            p=fun(x,y,fi.val(),false,p);//pierwszy punkt
+
+            for(var i=0;i<w.length;i++){
+                switch(w[i]){
+                    case "F":
+                        x+=Math.sin(fi.val());
+                        y+=Math.cos(fi.val());
+                        p=fun(x,y,fi.val(),true,p);
+                        break;
+                    case "f":
+                        x+=Math.sin(fi.val());
+                        y+=Math.cos(fi.val());
+                        p=fun(x,y,fi.val(),false,p);
+                        break;
+                    case "+":
+                        fi.add(f);
+                        p=fun(x,y,fi.val(),false,p);
+                        break;
+                    case "-":
+                        fi.add(-f);
+                        p=fun(x,y,fi.val(),false,p);
+                        break;
+                    default :
+                        console.log("Błąd. Nieznany znak: "+w[i]);
+                }
+            }
+            return p;
+
+        }
+
+        function RysujCiag(w,f,width,height,context){
+            console.log(w);
+            var p=[];
+            p[0]=new Punkt(0,0);
+            p[1]=new Punkt(0,0);
+            p=RysujCiagZolw(w,f,function (x,y,fi,rysowac,z){
+                if(x<z[0].x) z[0].x=x;
+                if(y<z[0].y) z[0].y=y;
+                if(x>z[1].x) z[1].x=x;
+                if(y>z[1].y) z[1].y=y;
+                return z;
+            },p);
+            p[0].x-=1;
+            p[0].y-=1;
+            p[1].x+=1;
+            p[1].y+=1;
+            var r={};
+            r["min"]=p[0];
+            r["max"]=p[1];
+
+            r["scalex"]=width/(p[1].x-p[0].x);
+            r["scaley"]=height/(p[1].y-p[0].y);
+            RysujCiagZolw(w,f,function (x,y,fi,rysowac,z){
+                if(rysowac){
+                    context.lineTo(z.scalex*(x- z.min.x),z.scaley*(y- z.min.y));
+                }else{
+                    context.moveTo(z.scalex*(x- z.min.x),z.scaley*(y- z.min.y));
+                }
+                return z;
+            },r);
+
+        }
+        var RePaint = function (){
+            canvas.width=MainWidth;
+            canvas.height=MainHeight;
+            //document.getElementById("sizeout").textContent=Math.floor(canvas.width)+"x"+Math.floor(canvas.height);
+            context.clearRect(0, 0, canvas.width, canvas.height);
+
+
+            context.strokeStyle='black';
+            wynik=[];
+            var c=LiczPodstawienia(Stopien,podstawiania[podst]);
+            console.log(c);
+            var w=LiczCiag(c);
+
+            RysujCiag(w,podstawiania[podst].kat,canvas.width,canvas.height,context);
+            context.stroke();
+            //console.log(w);
+
+        };
+
+
+        function StopienUp(){
+            Stopien++;
+            ReStopien();
+        }
+        function StopienDown(){
+            Stopien--;
+            Stopien=Stopien<1?1:Stopien;
+            ReStopien();
+        }
+        function ReStopien(){
+            //RePaint();
+            document.getElementById("StopienOut").textContent=Stopien;
+        }
+
+        window.onload = function() {
+            canvas = document.getElementById("drawingCanvas");
+            context = canvas.getContext("2d");
+
+
+            document.getElementById("xsize").onchange = function(){
+                MainWidth=this.value;
+                MainHeight=this.value;
+                document.getElementById("sizeout").textContent=Math.floor(MainWidth)+"x"+Math.floor(MainHeight);
+                //RePaint();
+            };
+//kształt
+            document.getElementById("ksz1").onchange = function(){
+                if(this.checked) podst=0;
+            };
+            document.getElementById("ksz2").onchange = function(){
+                if(this.checked) podst=1;
+            };
+            document.getElementById("ksz3").onchange = function(){
+                if(this.checked) podst=2;
+            };
+            document.getElementById("ksz4").onchange = function(){
+                if(this.checked) podst=3;
+            };
+
+        };
+
+    </script>
+</head>
+<body>
+<div>
+    <div class="linia">
+        <button onclick="StopienUp()">+</button> <button onclick="StopienDown()">-</button> Stopien: <span id="StopienOut">1</span><br>
+        <input type="range" id="xsize" min="400" max="2000" value="800" step="1" >
+        Rozmiar obrazu: (<span id="sizeout">800x800</span>)<br>
+
+    </div>
+    <div class="linia">
+        Wybierz kształt:<br>
+        <input id="ksz1" name="ksztalt" type="radio" checked>Krzywa Hilberta<br>
+        <input id="ksz2" name="ksztalt" type="radio" >Wyspa Kocha<br>
+        <input id="ksz3" name="ksztalt" type="radio" >Zbiór Cantora<br>
+        <input id="ksz4" name="ksztalt" type="radio" >Krzywa Kocha<br>
+
+    </div>
+</div>
+<button onclick="FraktalShow()">Oblicz</button><br>
+<canvas id="drawingCanvas" width="800" height="800"></canvas>
+</body>
+</html>
