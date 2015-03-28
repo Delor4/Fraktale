@@ -25,7 +25,7 @@
         var Ksztalt=0;
         var Przeksztalcenie=0;
 
-
+        var ryst;
         function Kat(_kat){
             this.kat=_kat;
             this.add=function(akat){
@@ -57,6 +57,7 @@
         ksztalty[0]=[new Punkt(0,0),new Punkt(1,1)];
         //ksztalty[0]=[new Punkt(0,0),new Punkt(0,1),new Punkt(.1,1),new Punkt(0,0.9),new Punkt(0,1),new Punkt(0.5,1),new Punkt(0.5,.9),new Punkt(0.5,1),new Punkt(1,1),new Punkt(1,0)];
         ksztalty[1]=[new Punkt(0.1,0.1),new Punkt(0.9,0.9)];
+        ksztalty[2]=[new Punkt(0.5,0.5)];
 
         var przeksztalcenia=[];
         przeksztalcenia[0]=[
@@ -64,9 +65,7 @@
             new Przekształcenie(0, 0.333 ,-0.333 ,0, 0.333, 1),new Przekształcenie(-0.333, 0 ,0 ,-0.333, 0.666, 0.666),new Przekształcenie(0, 0.333 ,-0.333 ,0, 0.333, 0.333),
             new Przekształcenie(0.333, 0 ,0 ,0.333, 0.666, 0),new Przekształcenie(0, -0.333 ,0.333 ,0, 1, 0.333),new Przekształcenie(0.333, 0 ,0 ,0.333, 0.666, 0.666)
         ];
-        //new Przekształcenie(0.333, 0 ,0 ,0.333, 0, 0) //1
-        //new Przekształcenie(0.333, 0 ,0 ,-0.333, 0, 0.333),new Przekształcenie(0, -0.333 ,0.333 ,0, 0.333, 0.333) //2
-        //new Przekształcenie(-0.333, 0 ,0 ,0.333, 0.333, 0), new Przekształcenie(0, 0.333 ,-0.333 ,0, 0, 0.333) //3
+
         function FraktalShow(){
             //ReCalculate();
             RePaint();
@@ -80,61 +79,84 @@
             return "rgb("+Math.floor(r)+","+Math.floor(g)+","+Math.floor(b)+")";
         }
 
-        function policzPrzekszt(przek_prz,St,Kszt,przek,width){
-            //console.log("policzPrzekszt",prz,St,Kszt,przek,width);
-        }
+
         var debug_wychodze;
-        function RysujIFS(St,Kszt,przek,width){
-            //console.log("RysujIFS",St,Kszt,przek,width);
-            if(debug_wychodze>2) return;
+
+        function RysujIFS(St,Kszt,przek,width,p){
             St--;
             if(St>0){
                 for(var prz=0;prz<przek.length;prz++){
+                    p.push(prz);
                     var ksz=[];
                     for(var i=0;i<Kszt.length;i++){
                         var px=(Kszt[i].x*przek[prz].a)+(Kszt[i].y*przek[prz].b)+(przek[prz].e);
                         var py=(Kszt[i].y*przek[prz].d)+(Kszt[i].x*przek[prz].c)+(przek[prz].f);
                         ksz[i]=new Punkt(px,py);
                     }
-                    RysujIFS(St,ksz,przek,width)
-//                    policzPrzekszt(przek[prz],St,Kszt,przek,width);
+
+                    RysujIFS(St,ksz,przek,width,p);
+                    p.pop();
                 }
             }else{
-                //context.beginPath();
-                context.lineTo(Kszt[0].x*width,width-(Kszt[0].y*width));
-                for(var i=1;i<Kszt.length;i++){
-                    context.lineTo(Kszt[i].x*width,width-(Kszt[i].y*width));
+                var f="0";
+                for(var i=p.length;i>0;i--){
+                    f+=p[i-1];
                 }
-                debug_wychodze++;
+                ryst[f]={
+//                    "i":f,
+                    "v":[]
+                };
+                //ryst[f]["v"].push(new Punkt(Kszt[0].x*width,width-(Kszt[0].y*width)));
+                for(var i=0;i<Kszt.length;i++){
+                    //context.lineTo(Kszt[i].x*width,width-(Kszt[i].y*width));
+                    ryst[f]["v"].push(new Punkt(Kszt[i].x*width,width-(Kszt[i].y*width)));
+                }
+
                 //context.closePath();
                 //context.stroke();
             }
         }
+        function RysFrakt(St,p,przek){
+            St--;
+            if(St>0){
+                for(var prz=0;prz<przek.length;prz++){
+                    p.unshift(prz);
+                    RysFrakt(St,p,przek);
+                    p.shift();
+
+                }
+            }else{
+                var f="";
+                for(var i=p.length;i>0;i--){
+                    f=f+p[i-1];
+                }
+                f="0"+f;
+                for(z=0;z<ryst[f].v.length;z++){
+                    context.lineTo(ryst[f].v[z].x,ryst[f].v[z].y);
+                }
+
+
+            }
+
+        }
         var RePaint = function (){
             debug_wychodze=0;
+
             canvas.width=MainWidth;
             canvas.height=MainHeight;
             //document.getElementById("sizeout").textContent=Math.floor(canvas.width)+"x"+Math.floor(canvas.height);
             context.clearRect(0, 0, canvas.width, canvas.height);
 
-            //context.save();
-            //context.scale(MainWidth,MainHeight);
 
             context.strokeStyle='black';
-//            context.lineWidth=Odstep;
-            //context.lineCap='butt';
-            //          context.lineCap='square';
-            context.imageSmoothingEnabled=false;
-            //RysujWzor(context,fraktal[Stopien].katy,x1,y1,x2,y2,wspx,wspy);
             var ksz=ksztalty[Ksztalt];
             context.moveTo(0,canvas.height);
-            RysujIFS(Stopien,ksz,przeksztalcenia[Przeksztalcenie],canvas.width);
+            ryst=[];
+            RysujIFS(Stopien,ksz,przeksztalcenia[Przeksztalcenie],canvas.width,[]);
+            RysFrakt(Stopien,[],przeksztalcenia[Przeksztalcenie]);
             context.lineTo(canvas.width,0);
             context.stroke();
 
-            //context.restore();
-            //		context.lineWidth=Odstep;
-            //		context.stroke();
 
         };
 
@@ -171,6 +193,9 @@
             document.getElementById("ksz2").onchange = function(){
                 if(this.checked) Ksztalt=1;
             };
+            document.getElementById("ksz3").onchange = function(){
+                if(this.checked) Ksztalt=2;
+            };
 
         };
 
@@ -188,6 +213,7 @@
         Wybierz kształt:<br>
         <input id="ksz1" name="ksztalt" type="radio" checked>linia przecinająca się<br>
         <input id="ksz2" name="ksztalt" type="radio" >krótsza linia<br>
+        <input id="ksz3" name="ksztalt" type="radio" >łączenie środków kwadratów<br>
 
     </div>
 </div>
