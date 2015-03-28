@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="utf-8">
+    <title>Grot Sierpińskiego</title>
+
+    <style>
+        canvas {
+            border: 1px dashed black;
+        }
+        .linia{
+            display: inline-block;
+        }
+    </style>
+
+    <script>
+        var canvas,context;
+
+        var MainWidth=800;
+        var MainHeight=800;
+
+
+        var Stopien=1;
+
+        var Ksztalt=0;
+        var Przeksztalcenie=0;
+
+
+        function Kat(_kat){
+            this.kat=_kat;
+            this.add=function(akat){
+                this.kat+=akat;
+                while(this.kat>(2*Math.PI)) this.kat-=Math.PI*2;
+                while(this.kat<0) this.kat+=Math.PI*2;
+            };
+            this.val=function(){
+                return this.kat;
+            }
+
+
+        }
+
+        function Punkt(_x,_y){
+            this.x=_x;
+            this.y=_y;
+        }
+
+        function Przekształcenie(_a,_b,_c,_d,_e,_f){
+            this.a=_a;
+            this.b=_b;
+            this.c=_c;
+            this.d=_d;
+            this.e=_e;
+            this.f=_f;
+        }
+        var ksztalty=[];
+        ksztalty[0]=[new Punkt(0,0),new Punkt(1,0)];
+        ksztalty[1]=[new Punkt(0,0),new Punkt(0.5,.866),new Punkt(1,0),new Punkt(0.5,0.1),new Punkt(0,0),new Punkt(0.5,-0.1),new Punkt(1,0)];
+
+        var przeksztalcenia=[];
+        przeksztalcenia[0]=[new Przekształcenie(-0.25, 0.433 ,-0.433 ,-0.25, 0.25, 0.433),new Przekształcenie(-0.25, -0.433 ,0.433 ,-0.25, 1, 0),new Przekształcenie(0.5, 0 ,0 ,0.5, 0.25, 0.433)];
+        function FraktalShow(){
+            //ReCalculate();
+            RePaint();
+        }
+
+
+        function dl(x1,y1,x2,y2){
+            return Math.sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1));
+        }
+        function rgb(r, g, b){
+            return "rgb("+Math.floor(r)+","+Math.floor(g)+","+Math.floor(b)+")";
+        }
+
+        function policzPrzekszt(prz,St,Kszt,przek,width){
+            //console.log("policzPrzekszt",prz,St,Kszt,przek,width);
+            var ksz=[];
+            for(var i=0;i<Kszt.length;i++){
+                var px=(Kszt[i].x*prz.a)+(Kszt[i].y*prz.b)+(prz.e);
+                var py=(Kszt[i].y*prz.d)+(Kszt[i].x*prz.c)+(prz.f);
+                ksz[i]=new Punkt(px,py);
+            }
+            RysujIFS(St,ksz,przek,width)
+        }
+        function RysujIFS(St,Kszt,przek,width){
+            //console.log("RysujIFS",St,Kszt,przek,width);
+            St--;
+            if(St>0){
+                for(var prz=0;prz<przek.length;prz++){
+                    policzPrzekszt(przek[prz],St,Kszt,przek,width);
+                }
+            }else{
+                context.beginPath();
+                context.moveTo(Kszt[0].x*width,width-(Kszt[0].y*width));
+                for(var i=1;i<Kszt.length;i++){
+                    context.lineTo(Kszt[i].x*width,width-(Kszt[i].y*width));
+                }
+                context.closePath();
+                context.stroke();
+            }
+        }
+        var RePaint = function (){
+            canvas.width=MainWidth;
+            canvas.height=MainHeight;
+            //document.getElementById("sizeout").textContent=Math.floor(canvas.width)+"x"+Math.floor(canvas.height);
+            context.clearRect(0, 0, canvas.width, canvas.height);
+
+            //context.save();
+            //context.scale(MainWidth,MainHeight);
+
+            context.strokeStyle='black';
+//            context.lineWidth=Odstep;
+            //context.lineCap='butt';
+            //          context.lineCap='square';
+            context.imageSmoothingEnabled=false;
+            //RysujWzor(context,fraktal[Stopien].katy,x1,y1,x2,y2,wspx,wspy);
+            var ksz=ksztalty[Ksztalt];
+            RysujIFS(Stopien,ksz,przeksztalcenia[Przeksztalcenie],canvas.width);
+
+            //context.restore();
+            //		context.lineWidth=Odstep;
+            //		context.stroke();
+
+        };
+
+
+        function StopienUp(){
+            Stopien++;
+            ReStopien();
+        }
+        function StopienDown(){
+            Stopien--;
+            Stopien=Stopien<1?1:Stopien;
+            ReStopien();
+        }
+        function ReStopien(){
+            //RePaint();
+            document.getElementById("StopienOut").textContent=Stopien;
+        }
+
+        window.onload = function() {
+            canvas = document.getElementById("drawingCanvas");
+            context = canvas.getContext("2d");
+
+
+            document.getElementById("xsize").onchange = function(){
+                MainWidth=this.value;
+                MainHeight=this.value;
+                document.getElementById("sizeout").textContent=Math.floor(MainWidth)+"x"+Math.floor(MainHeight);
+                //RePaint();
+            };
+//kształt
+            document.getElementById("ksz1").onchange = function(){
+                if(this.checked) Ksztalt=0;
+            };
+            document.getElementById("ksz2").onchange = function(){
+                if(this.checked) Ksztalt=1;
+            };
+
+        };
+
+    </script>
+</head>
+<body>
+<div>
+    <div class="linia">
+        <button onclick="StopienUp()">+</button> <button onclick="StopienDown()">-</button> Stopien: <span id="StopienOut">1</span><br>
+        <input type="range" id="xsize" min="400" max="2000" value="800" step="1" >
+        Rozmiar obrazu: (<span id="sizeout">800x800</span>)<br>
+
+    </div>
+    <div class="linia">
+        Wybierz kształt:<br>
+        <input id="ksz1" name="ksztalt" type="radio" checked>linia<br>
+        <input id="ksz2" name="ksztalt" type="radio" >kształt na bazie trójkąta<br>
+
+    </div>
+</div>
+<button onclick="FraktalShow()">Oblicz</button><br>
+<canvas id="drawingCanvas" width="800" height="800"></canvas>
+</body>
+</html>
