@@ -77,10 +77,52 @@
         podstawiania[3]={
             "aksjomat":"F",
             "kat":Math.PI/3,
+            "scaleY":true,
             "F":"F+F--F+F",
             "+":"+",
             "-":"-"
         };
+        podstawiania[4]={
+            "aksjomat":"L",
+            "kat":Math.PI/3,
+            "scaleY":true,
+            "L":"+R-L-R+",
+            "R":"-L+R+L-",
+            "+":"+",
+            "-":"-"
+        };
+        podstawiania[5]={
+            "aksjomat":"F",
+            "kat":Math.PI/2,
+            //"scaleY":true,
+            "F":"FF+F+F+FF+F+F-F",
+            "+":"+",
+            "-":"-"
+        };
+        podstawiania[6]={
+            "aksjomat":"D",
+            "kat":Math.PI/4,
+            "scaleY":true,
+            "D":"-D++E",
+            "E":"D--E+",
+            "+":"+",
+            "-":"-"
+        };
+        symbole["D"]="--F++F";
+        symbole["E"]="F--F++";
+
+        podstawiania[7]={
+            "aksjomat":"S",
+            "kat":Math.PI/2,
+            "scaleY":true,
+            "S":"SFZFS+F+ZFSFZ-F-SFZFS",
+            "Z":"ZFSFZ-F-SFZFS+F+ZFSFZ",
+            "F":"F",
+            "+":"+",
+            "-":"-"
+        };
+        symbole["S"]="FF+F+FF-F-FF";
+        symbole["Z"]="FF-F-FF+F+FF";
 
         function FraktalShow(){
             //ReCalculate();
@@ -149,7 +191,7 @@
 
         }
 
-        function RysujCiag(w,f,width,height,context){
+        function RysujCiag(w,f,width,height,scale,context){
             console.log(w);
             var p=[];
             p[0]=new Punkt(0,0);
@@ -171,6 +213,10 @@
 
             r["scalex"]=width/(p[1].x-p[0].x);
             r["scaley"]=height/(p[1].y-p[0].y);
+            if(scale){
+                if(r["scalex"]>r["scaley"]) r["scalex"]=r["scaley"];
+                if(r["scalex"]<r["scaley"]) r["scaley"]=r["scalex"];
+            }
             RysujCiagZolw(w,f,function (x,y,fi,rysowac,z){
                 if(rysowac){
                     context.lineTo(z.scalex*(x- z.min.x),z.scaley*(y- z.min.y));
@@ -194,7 +240,7 @@
             console.log(c);
             var w=LiczCiag(c);
 
-            RysujCiag(w,podstawiania[podst].kat,canvas.width,canvas.height,context);
+            RysujCiag(w,podstawiania[podst].kat,canvas.width,canvas.height,("scaleY" in podstawiania[podst])?podstawiania[podst].scaleY:false,context);
             context.stroke();
             //console.log(w);
 
@@ -239,6 +285,18 @@
             document.getElementById("ksz4").onchange = function(){
                 if(this.checked) podst=3;
             };
+            document.getElementById("ksz5").onchange = function(){
+                if(this.checked) podst=4;
+            };
+            document.getElementById("ksz6").onchange = function(){
+                if(this.checked) podst=5;
+            };
+            document.getElementById("ksz7").onchange = function(){
+                if(this.checked) podst=6;
+            };
+            document.getElementById("ksz8").onchange = function(){
+                if(this.checked) podst=7;
+            };
 
         };
 
@@ -258,6 +316,10 @@
         <input id="ksz2" name="ksztalt" type="radio" >Wyspa Kocha<br>
         <input id="ksz3" name="ksztalt" type="radio" >Zbiór Cantora<br>
         <input id="ksz4" name="ksztalt" type="radio" >Krzywa Kocha<br>
+        <input id="ksz5" name="ksztalt" type="radio" >Grot Sierpińskiego<br>
+        <input id="ksz6" name="ksztalt" type="radio" >Krzywa Peana<br>
+        <input id="ksz7" name="ksztalt" type="radio" >Krzywa Smoka<br>
+        <input id="ksz8" name="ksztalt" type="radio" >Krzywa SZ Peana<br>
 
     </div>
 </div>
