@@ -124,6 +124,115 @@
         symbole["S"]="FF+F+FF-F-FF";
         symbole["Z"]="FF-F-FF+F+FF";
 
+        symbole["["]="[";
+        symbole["]"]="]";
+        podstawiania[8]={
+            "aksjomat":"F",
+            "kat":25.7*Math.PI/180,
+            "scaleY":true,
+            "startfi":Math.PI,
+            "F":"F[+F]F[-F]F",
+            "+":"+",
+            "-":"-",
+            "[":"[",
+            "]":"]"
+        };
+
+        podstawiania[9]={
+            "aksjomat":"F",
+            "kat":25*Math.PI/180,
+            "scaleY":true,
+            "startfi":Math.PI,
+            "F":"FF+[+F-F-F]-[-F+F+F]",
+            "+":"+",
+            "-":"-",
+            "[":"[",
+            "]":"]"
+        };
+        symbole["B"]="";
+        podstawiania[10]={
+            "aksjomat":"B",
+            "kat":20*Math.PI/180,
+            "scaleY":true,
+            "startfi":Math.PI,
+            "F":"FF",
+            "B":"F[+B]F[-B]+B",
+            "+":"+",
+            "-":"-",
+            "[":"[",
+            "]":"]"
+        };
+        podstawiania[11]={
+            "aksjomat":"F",
+            "kat":20*Math.PI/180,
+            "scaleY":true,
+            "startfi":Math.PI,
+            "losowy":true,
+            "F":[
+                {p:.333,v:"F[+F]F[-F]F"},
+                {p:.333,v:"F[+F]F"},
+                {p:.333,v:"F[-F]F"}
+            ],
+            "+":"+",
+            "-":"-",
+            "[":"[",
+            "]":"]"
+        };
+        podstawiania[12]={
+            "aksjomat":"F",
+            "kat":60*Math.PI/180,
+            "scaleY":true,
+            "startfi":Math.PI/2,
+            "losowy":true,
+            "F":[
+                {p:.5,v:"F-F++F-F"},
+                {p:.5,v:"F+F--F+F"}
+
+            ],
+            "+":"+",
+            "-":"-"
+        };
+        podstawiania[13]={
+            "aksjomat":"F--F--F",
+            "kat":60*Math.PI/180,
+            "scaleY":true,
+            "startfi":Math.PI/2,
+            "losowy":true,
+            "F":[
+                {p:.5,v:"F-F++F-F"},
+                {p:.5,v:"F+F--F+F"}
+
+            ],
+            "+":"+",
+            "-":"-"
+        };
+        podstawiania[14]={
+            "aksjomat":"F",
+            "kat":0,
+            "katminus":45*Math.PI/180,
+            "katplus":30*Math.PI/180,
+            "scaleY":true,
+            "startfi":Math.PI,
+            "skracaj":0.7,
+            "F":"F[+F][-F]",
+            "+":"+",
+            "-":"-",
+            "[":"[",
+            "]":"]"
+        };
+        podstawiania[15]={
+            "aksjomat":"F",
+            "kat":0,
+            "katminus":45*Math.PI/180,
+            "katplus":30*Math.PI/180,
+            "scaleY":true,
+            "startfi":Math.PI,
+            "F":"FF[+F][-F]",
+            "+":"+",
+            "-":"-",
+            "[":"[",
+            "]":"]"
+        };
         function FraktalShow(){
             //ReCalculate();
             RePaint();
@@ -131,11 +240,28 @@
 
         function LiczPodstawienia(St,podst){
             var wyn=[];
+            var losowy=("losowy" in podst)?podst.losowy:false;
+
             wyn[0]=podst.aksjomat;
             for(var i=1;i<St;i++){
                 wyn[i]="";
                 for(var j=0;j<wyn[i-1].length;j++){
-                    wyn[i]+=podst[wyn[i-1][j]];
+                    var pp=podst[wyn[i - 1][j]];
+                    if(losowy && Array.isArray(pp)){
+                        var rnd=Math.random();
+                        var sp=0;
+
+                        for(var k=0;k<pp.length;k++){
+                            sp+=pp[k].p;
+                            if(rnd<sp){
+                                wyn[i] += pp[k].v;
+                                break;
+                            }
+                        }
+
+                    }else {
+                        wyn[i] += pp;
+                    }
                 }
             }
             return wyn[St-1];
@@ -151,39 +277,59 @@
             while(!done){
                 wy=wy.replace("+-","");
                 wy=wy.replace("-+","");
+                wy=wy.replace("[+]","");
+                wy=wy.replace("[-]","");
                 if(wyn==wy) done=true;
                 wyn=wy;
             }
             return wyn;
         }
-        function RysujCiagZolw(w,f,fun,p){
+        function RysujCiagZolw(w,f1,f2,ff,skracaj,fun,p){
             var x=0;
             var y=0;
-            var fi=new Kat(Math.PI/2);
+            var fi=new Kat(ff);
+            var stos=[];
+            var r=1;
 
             p=fun(x,y,fi.val(),false,p);//pierwszy punkt
 
             for(var i=0;i<w.length;i++){
                 switch(w[i]){
                     case "F":
-                        x+=Math.sin(fi.val());
-                        y+=Math.cos(fi.val());
+                        x+=r*Math.sin(fi.val());
+                        y+=r*Math.cos(fi.val());
                         p=fun(x,y,fi.val(),true,p);
                         break;
                     case "f":
-                        x+=Math.sin(fi.val());
-                        y+=Math.cos(fi.val());
+                        x+=r*Math.sin(fi.val());
+                        y+=r*Math.cos(fi.val());
                         p=fun(x,y,fi.val(),false,p);
                         break;
                     case "+":
-                        fi.add(f);
+                        fi.add(f1);
                         p=fun(x,y,fi.val(),false,p);
                         break;
                     case "-":
-                        fi.add(-f);
+                        fi.add(-f2);
                         p=fun(x,y,fi.val(),false,p);
                         break;
                     default :
+                    case "[":
+                            stos.push({x:x,y:y,fi:fi.val(),r:r});
+                            r*=skracaj;
+                            p=fun(x,y,fi.val(),false,p);
+
+                        break;
+                    case "]":
+                            var tmp=stos.pop();
+                            x=tmp.x;
+                            y=tmp.y;
+                            fi.kat=tmp.fi;
+                            r=tmp.r;
+                        p=fun(x,y,fi.val(),false,p);
+
+                        break;
+
                         console.log("Błąd. Nieznany znak: "+w[i]);
                 }
             }
@@ -191,12 +337,17 @@
 
         }
 
-        function RysujCiag(w,f,width,height,scale,context){
+        function RysujCiag(w,pods,width,height,context){
             console.log(w);
+            var f1=pods.kat==0?pods.katplus:pods.kat;
+            var f2=pods.kat==0?pods.katminus:pods.kat;
+            var scale=("scaleY" in pods)?pods.scaleY:false;
+            var startfi=("startfi" in pods)?pods.startfi:Math.PI/2;
+            var skracaj=("skracaj" in pods)?pods.skracaj:1;
             var p=[];
             p[0]=new Punkt(0,0);
             p[1]=new Punkt(0,0);
-            p=RysujCiagZolw(w,f,function (x,y,fi,rysowac,z){
+            p=RysujCiagZolw(w,f1,f2,startfi,skracaj,function (x,y,fi,rysowac,z){
                 if(x<z[0].x) z[0].x=x;
                 if(y<z[0].y) z[0].y=y;
                 if(x>z[1].x) z[1].x=x;
@@ -217,7 +368,7 @@
                 if(r["scalex"]>r["scaley"]) r["scalex"]=r["scaley"];
                 if(r["scalex"]<r["scaley"]) r["scaley"]=r["scalex"];
             }
-            RysujCiagZolw(w,f,function (x,y,fi,rysowac,z){
+            RysujCiagZolw(w,f1,f2,startfi,skracaj,function (x,y,fi,rysowac,z){
                 if(rysowac){
                     context.lineTo(z.scalex*(x- z.min.x),z.scaley*(y- z.min.y));
                 }else{
@@ -225,6 +376,7 @@
                 }
                 return z;
             },r);
+            context.stroke();
 
         }
         var RePaint = function (){
@@ -240,8 +392,8 @@
             console.log(c);
             var w=LiczCiag(c);
 
-            RysujCiag(w,podstawiania[podst].kat,canvas.width,canvas.height,("scaleY" in podstawiania[podst])?podstawiania[podst].scaleY:false,context);
-            context.stroke();
+            RysujCiag(w,podstawiania[podst],canvas.width,canvas.height,context);
+            //context.stroke();
             //console.log(w);
 
         };
@@ -297,6 +449,30 @@
             document.getElementById("ksz8").onchange = function(){
                 if(this.checked) podst=7;
             };
+            document.getElementById("ksz9").onchange = function(){
+                if(this.checked) podst=8;
+            };
+            document.getElementById("ksz10").onchange = function(){
+                if(this.checked) podst=9;
+            };
+            document.getElementById("ksz11").onchange = function(){
+                if(this.checked) podst=10;
+            };
+            document.getElementById("ksz12").onchange = function(){
+                if(this.checked) podst=11;
+            };
+            document.getElementById("ksz13").onchange = function(){
+                if(this.checked) podst=12;
+            };
+            document.getElementById("ksz14").onchange = function(){
+                if(this.checked) podst=13;
+            };
+            document.getElementById("ksz15").onchange = function(){
+                if(this.checked) podst=14;
+            };
+            document.getElementById("ksz16").onchange = function(){
+                if(this.checked) podst=15;
+            };
 
         };
 
@@ -306,7 +482,7 @@
 <div>
     <div class="linia">
         <button onclick="StopienUp()">+</button> <button onclick="StopienDown()">-</button> Stopien: <span id="StopienOut">1</span><br>
-        <input type="range" id="xsize" min="400" max="2000" value="800" step="1" >
+        <input type="range" id="xsize" min="400" max="2000" value="800" step="1" ><br>
         Rozmiar obrazu: (<span id="sizeout">800x800</span>)<br>
 
     </div>
@@ -316,11 +492,28 @@
         <input id="ksz2" name="ksztalt" type="radio" >Wyspa Kocha<br>
         <input id="ksz3" name="ksztalt" type="radio" >Zbiór Cantora<br>
         <input id="ksz4" name="ksztalt" type="radio" >Krzywa Kocha<br>
+
+    </div>
+    <div class="linia">
+        <br>
         <input id="ksz5" name="ksztalt" type="radio" >Grot Sierpińskiego<br>
         <input id="ksz6" name="ksztalt" type="radio" >Krzywa Peana<br>
         <input id="ksz7" name="ksztalt" type="radio" >Krzywa Smoka<br>
         <input id="ksz8" name="ksztalt" type="radio" >Krzywa SZ Peana<br>
-
+    </div>
+    <div class="linia">
+        <br>
+        <input id="ksz9" name="ksztalt" type="radio">Chwast I<br>
+        <input id="ksz10" name="ksztalt" type="radio" >Krzak<br>
+        <input id="ksz15" name="ksztalt" type="radio" >Drzewo<br>
+        <input id="ksz11" name="ksztalt" type="radio" >Chwast II<br>
+    </div>
+    <div class="linia">
+        <br>
+        <input id="ksz16" name="ksztalt" type="radio" >Chwast III<br>
+        <input id="ksz12" name="ksztalt" type="radio" >Losowy chwast<br>
+        <input id="ksz13" name="ksztalt" type="radio" >Losowa krzywa Kocha<br>
+        <input id="ksz14" name="ksztalt" type="radio" >Losowa wyspa Kocha<br>
     </div>
 </div>
 <button onclick="FraktalShow()">Oblicz</button><br>
