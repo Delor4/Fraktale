@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="utf-8">
+    <title>Diagram Feigenbauma</title>
+
+    <style>
+        canvas {
+            border: 1px dashed black;
+        }
+        .linia{
+            display: inline-block;
+        }
+    </style>
+    <script src="js/DelorGraph.js" type="text/javascript"></script>
+    <script>
+        var canvas,context;
+
+        var MainWidth=800;
+        var MainHeight=800;
+
+        var apocz=1;
+        var akonc=4;
+        var xd=0;
+        var xg=1;
+        var iter=3000;
+        var ukryj=100;
+
+        function Kat(_kat){
+            this.kat=_kat;
+            this.add=function(akat){
+                this.kat+=akat;
+                while(this.kat>(2*Math.PI)) this.kat-=Math.PI*2;
+                while(this.kat<0) this.kat+=Math.PI*2;
+            };
+            this.val=function(){
+                return this.kat;
+            }
+        }
+
+        function Punkt(_x,_y){
+            this.x=_x;
+            this.y=_y;
+        }
+
+        function dl(x1,y1,x2,y2){
+            return Math.sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1));
+        }
+        function rgb(r, g, b){
+            return "rgb("+Math.floor(r)+","+Math.floor(g)+","+Math.floor(b)+")";
+        }
+
+        var click=false;
+        var startx,starty;
+        var kurx,kury;
+        var h, w,dw,dh,dx,lewy;
+        function MouseMove(e){
+            if(click) {
+                kurx = e.pageX - gf.canvas.offsetLeft;
+                kury = e.pageY - gf.canvas.offsetTop;
+                RePaint();
+
+            }
+        }
+        function ClickOn(e){
+            //var x=e.pageX - canvas2.offsetLeft;
+            //var y=e.pageY - canvas2.offsetTop;
+            startx=e.pageX - gf.canvas.offsetLeft;
+            starty=e.pageY - gf.canvas.offsetTop;
+            kurx=startx;
+            kury=starty;
+            click=true;
+            RePaint();
+        }
+        var stany=[];
+        function ClickOff(e){
+            if(click) {
+                //var x=e.pageX - canvas2.offsetLeft;
+                //var y=e.pageY - canvas2.offsetTop;
+                if(startx>kurx){
+                    var tmp=startx;
+                    startx=kurx;
+                    kurx=tmp;
+                }
+                if(starty>kury){
+                    var tmp=starty;
+                    starty=kury;
+                    kury=tmp;
+
+                }
+                var a1=apocz+(startx-lewy)*dx/dw;
+
+                var a2=apocz+(kurx-lewy)*dx/dw;
+                if(a1<apocz) a1=apocz;
+                if(a1>akonc) a1=akonc;
+                if(a2<apocz) a2=apocz;
+                if(a2>akonc) a2=akonc;
+                var x1=xd+((gf.height-starty)-lewy)/dh;
+                var x2=xd+((gf.height-kury)-lewy)/dh;
+                if(x1>xg) x1=xg;
+                if(x1<xd) x1=xd;
+                if(x2>xg) x2=xg;
+                if(x2<xd) x2=xd;
+                if(startx==kurx || starty==kury) return;
+                stany.push({a1:apocz,a2:akonc,x1:xg,x2:xd});
+                apocz=a1;
+                akonc=a2;
+                xd=x2;
+                xg=x1;
+                click = false;
+                RePaint();
+            }
+        }
+
+        function Cofnij(){
+            if(stany.length<1) return;
+            var s=stany.pop();
+            apocz= s.a1;
+            akonc= s.a2;
+            xd= s.x2;
+            xg= s.x1;
+            RePaint();
+        }
+        var RePaint = function (){
+            lewy=20;
+
+            dx=1;
+
+            gf.setSize(MainWidth,MainHeight);
+            gf.clearRect(0, 0, gf.width, gf.height);
+
+
+            gf.context.strokeStyle='black';
+
+            h=gf.height-40;
+            w=gf.width-40;
+            dw=w/(akonc-apocz);
+            dh=h/(xg-xd);
+            //linia pozioma
+            gf.moveTo(lewy,h+lewy);
+            gf.lineTo(w+lewy,h+lewy);
+            var d=Math.floor(Math.log(akonc-apocz)/Math.log(10));
+            var td=Math.pow(10,d)/10;
+            if((akonc-apocz)/td >50) td=5*td;
+            if((akonc-apocz)/td >25) td=2.5*td;
+            var ts=td*(Math.floor(apocz/td)+1);
+            for(var i=0;i<=(akonc-apocz)/td-1;i++){
+                var a=i*td+ts;
+                gf.moveTo(lewy+dw*(a-apocz),h+lewy);
+                gf.lineTo(lewy+dw*(a-apocz),h+10+lewy);
+
+            }
+
+            //linia pionowa
+            gf.moveTo(lewy,lewy);
+            gf.lineTo(lewy,h+lewy);
+            var d2=Math.floor(Math.log(xg-xd)/Math.log(10));
+            var td2=Math.pow(10,d2)/10;
+            if((xg-xd)/td2 >50) td2=5*td2;
+            if((xg-xd)/td2 >25) td2=2.5*td2;
+            var ts2=td2*(Math.floor(xd/td2)+1);
+            for(var i=0;i<=(xg-xd)/td2-1;i++){
+                var a=i*td2+ts2;
+                gf.moveTo(lewy,lewy+h-dh*(a-xd));
+                gf.lineTo(lewy-10,lewy+h-dh*(a-xd));
+
+            }
+            gf.stroke();
+            gf.fillText(""+apocz,lewy,h+lewy+15);
+            gf.fillText(""+akonc,w+lewy,h+lewy+15);
+            var xdstr=(""+xd).substr(0,4);
+            gf.fillText(xdstr,0,h+lewy);
+            var xgstr=(""+xg).substr(0,4);
+            gf.fillText(xgstr,0,lewy);
+            //rysujemy iteracje
+            gf.startPointMode();
+            var xn=.01;
+            for(var i=1;i<=w/dx;i++){
+                var a=apocz+i*dx/dw;
+                for(var k=1;k<=iter;k++){
+                    xn=a*xn*(1-xn);
+                    if(k<ukryj) continue;
+                    if(xn>xg) continue;
+                    if(xn<xd) continue;
+                    gf.drawPoint(lewy+i*dx,lewy+(xg-xn)*dh,0,0,0,255);
+
+                }
+            }
+            gf.endPointMode();
+            if(click){
+                gf.moveTo(startx,starty);
+                gf.lineTo(kurx,starty);
+                gf.lineTo(kurx,kury);
+                gf.lineTo(startx,kury);
+                gf.lineTo(startx,starty);
+                gf.stroke();
+            }
+
+        };
+
+
+        window.onload = function() {
+            gf=new DelorGraph(document.getElementById("drawingCanvas"));
+            //canvas = document.getElementById("drawingCanvas");
+            //context = canvas.getContext("2d");
+            gf.canvas.onmousedown=ClickOn;
+            gf.canvas.onmouseup=ClickOff;
+            gf.canvas.onmousemove=MouseMove;
+
+
+            document.getElementById("xsize").onchange = function(){
+                MainWidth=this.value;
+                document.getElementById("sizeout").textContent=Math.floor(MainWidth)+"x"+Math.floor(MainHeight);
+                RePaint();
+            };
+            document.getElementById("ysize").onchange = function(){
+                MainHeight=this.value;
+                document.getElementById("sizeout").textContent=Math.floor(MainWidth)+"x"+Math.floor(MainHeight);
+                RePaint();
+            };
+            RePaint();
+        };
+
+    </script>
+</head>
+<body>
+<div>
+    <div class="linia">
+        <input type="range" id="xsize" min="400" max="2000" value="800" step="1" >
+        <input type="range" id="ysize" min="400" max="2000" value="800" step="1" >
+        Rozmiar obrazu: (<span id="sizeout">800x800</span>)<br>
+
+    </div>
+</div>
+<button onclick="Cofnij()">Cofnij</button><br>
+<canvas id="drawingCanvas" width="800" height="800"></canvas>
+</body>
+</html>
