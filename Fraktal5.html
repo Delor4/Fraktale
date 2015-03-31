@@ -45,17 +45,17 @@ canvas {
 		//var y3=y1;
 
 		//var x4=x-(r*Math.sqrt(3)/2);
-		var y4=y+(r/2);
+		var y4=y+(ro/2);
 
 		//var x5=x+(r*Math.sqrt(3)/2);
 		//var y5=y4;
 		
-		var z=r-((2*r)/(2+Math.sqrt(3)));
-		var d=r/(2+Math.sqrt(3));
+		var z=ro-((2*ro)/(2+Math.sqrt(3)));
+        var d=ro/(2+Math.sqrt(3));
 		
 		PaintOkrag(stopien,x3-z,y1,x3+z,y1+z+z,r+(255/Stopien),g,b);
-		PaintOkrag(stopien,x3-z-z,y4-((r/2)-d)-z,x3,y4-((r/2)-d)+z,r,g+(255/Stopien),b);
-		PaintOkrag(stopien,x3,y4-((r/2)-d)-z,x3+z+z,y4-((r/2)-d)+z,r,g,b+(255/Stopien));
+		PaintOkrag(stopien,x3-z-z,y4-((ro/2)-d)-z,x3,y4-((ro/2)-d)+z,r,g+(255/Stopien),b);
+		PaintOkrag(stopien,x3,y4-((ro/2)-d)-z,x3+z+z,y4-((ro/2)-d)+z,r,g,b+(255/Stopien));
 			
 			/*context.beginPath();
 			context.moveTo(x3,y3);
