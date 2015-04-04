@@ -332,12 +332,12 @@
             for(i=0;i<10000;i++){
                 var xz=s*i+recen;
                 var yz=imcen;
-                console.log(xz,yz);
+                //console.log(xz,yz);
                 if(!LiczIteracje(xz,yz)){
                   break;
                 }
             }
-            console.log(i);
+            //console.log(i);
             var x=[];
             var y=[];
             var vwewn=1;
@@ -357,13 +357,13 @@
             var vref;
             var krokow=0;
             while(true) {
-                console.log("c=",s*x[vnowe]+recen, s*y[vnowe]+imcen);
+                //console.log("c=",s*x[vnowe]+recen, s*y[vnowe]+imcen);
                 if (!LiczIteracje(s*x[vnowe]+recen, s*y[vnowe]+imcen)) {
                     vref = vzewn;
                     vzewn = vnowe;
                     vnowe = vref;
                 } else {
-                    console.log("x=",x[vnowe]+w/2, -y[vnowe]+w/2);
+                    //console.log("x=",x[vnowe]+w/2, -y[vnowe]+w/2);
                     gf.lineTo(x[vnowe]+w/2, -y[vnowe]+w/2);
                     vref = vwewn;
                     vwewn = vnowe;
@@ -371,7 +371,7 @@
                 }
                 x[vnowe] = x[vwewn] + x[vzewn] - x[vref];
                 y[vnowe] = y[vwewn] + y[vzewn] - y[vref];
-                if(krokow>10000) break;
+                if(krokow>10000) break;//zabezpieczenie
                 krokow++;
                 if (x[vwewn] != xwewn || y[vwewn] != ywewn) continue;
                 if (x[vzewn] != xzewn || y[vzewn] != yzewn) continue;
