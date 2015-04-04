@@ -26,6 +26,7 @@
         var Stopien=5;
         var cr=0;
         var ci=1;
+        var sposobRys=0;
 
         var dx,dy;
         function Point(_x,_y){
@@ -319,7 +320,15 @@
                     for(var y=0;y<gf.height;y++){
                         var yz=y1+dy*y;
 
-                        if(LiczIteracje(k,xz,yz,c,R2)) gf.drawPoint(x,y,255*((k+1)%2),255*((k+1)%2),255*((k+1)%2),255);
+                        if(LiczIteracje(k,xz,yz,c,R2)){
+                            if(sposobRys==0) gf.drawPoint(x,y,255*((k+1)%2),255*((k+1)%2),255*((k+1)%2),255);
+                            else if(sposobRys==1) gf.drawPoint(x,y,0,0,0,255/(Stopien-k));
+                            else if(sposobRys==2){
+                                if(k==Stopien) gf.drawPoint(x,y,0,0,0,255);
+                                else gf.drawPoint(x,y,0,0,0,0);
+
+                            }
+                        }
                     }
                 }
             }
@@ -379,6 +388,18 @@
 
                 RePaint();
             };
+            document.getElementById("rb0").onchange = function(){
+                if(this.checked==true) sposobRys=0;
+                RePaint();
+            };
+            document.getElementById("rb1").onchange = function(){
+                if(this.checked==true) sposobRys=1;
+                RePaint();
+            };
+            document.getElementById("rb2").onchange = function(){
+                if(this.checked==true) sposobRys=2;
+                RePaint();
+            };
             ReStopien();
         };
 
@@ -386,16 +407,20 @@
 </head>
 <body>
 <div>
-    <button onclick="StopienUp()">+</button> <button onclick="StopienDown()">-</button> Stopien: <span id="StopienOut">1</span><br>
+    <div class="linia">
+        <button onclick="StopienUp()">+</button> <button onclick="StopienDown()">-</button> Stopien: <span id="StopienOut">1</span><br>
+        Przekształcenie: z → z<sup>2</sup> + c<br>
+        c.re <input type="range" id="cre" min="-2" max="2" value="0" step="0.1" > c.im <input type="range" id="cim" min="-2" max="2" value="1" step="0.1" > c=(<span id="c_out"></span>)<br>
+    </div>
     <div class="linia">
         <input type="range" id="xsize" min="400" max="2000" value="800" step="1" >
         <input type="range" id="ysize" min="400" max="2000" value="800" step="1" >
         Rozmiar obrazu: (<span id="sizeout">800x800</span>)<br>
+        Wyświetlanie: <input id="rb0" name="praca" type="radio" checked> Czarno-białe
+        <input id="rb1" name="praca" type="radio"> Cieniowane
+        <input id="rb2" name="praca" type="radio"> Czarne
+        <br>
 
-    </div>
-    <div>
-        Przekształcenie: z → z<sup>2</sup> + c<br>
-    c.re <input type="range" id="cre" min="-2" max="2" value="0" step="0.1" > c.im <input type="range" id="cim" min="-2" max="2" value="1" step="0.1" > c=(<span id="c_out"></span>)<br>
     </div>
 </div>
 <button onclick="Cofnij()">Cofnij</button><br>
