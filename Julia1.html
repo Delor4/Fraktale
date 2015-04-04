@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="utf-8">
+    <title>Zbiory Julii cz.1</title>
+
+    <style>
+        canvas {
+            border: 1px dashed black;
+        }
+        .linia{
+            display: inline-block;
+        }
+    </style>
+    <script src="js/DelorGraph.js" type="text/javascript"></script>
+    <script>
+        var canvas,context;
+
+        var MainWidth=800;
+        var MainHeight=800;
+
+        var x1=-2;
+        var x2=2;
+        var y1=-2;
+        var y2=2;
+        var Stopien=5;
+        var cr=0;
+        var ci=1;
+
+        var dx,dy;
+        function Point(_x,_y){
+            this.x=_x;
+            this.y=_y;
+
+
+        };
+
+        Point.prototype.operands=[];
+
+        Point.prototype.valueOf =function () {
+            this.operands.push(this);
+            return 3;
+        };
+        Point.prototype.toString =function () {
+            return "{"+this.x+","+this.y+"}";
+        };
+
+        Point.prototype.setAdd=function(){
+            this.x=0;
+            this.y=0;
+            for(var i=0;i<arguments.length;i++){
+                this.x+=arguments[i].x;
+                this.y+=arguments[i].y;
+            }
+        };
+        Point.prototype.setMultiply=function(){
+            this.x=1;
+            this.y=1;
+            for(var i=0;i<arguments.length;i++){
+                this.x*=arguments[i].x;
+                this.y*=arguments[i].y;
+            }
+
+        };
+        Point.prototype.setDivide=function(a,b){
+            this.x= a.x/ b.x;
+            this.y= a.y/ b.y;
+        };
+        Point.prototype.setSubtract=function(a,b){
+            this.x= a.x- b.x;
+            this.y= a.y- b.y;
+        };
+
+        Object.defineProperty(Point.prototype, "_", {
+            set: function (value) {
+                var ops = Point.prototype.operands;
+                var operator;
+                if (ops.length === 2 && value === 0) { // 3 - 3
+                    operator = this.setSubtract;
+                } else if (ops.length === 2 && value === 1) { // 3 / 3
+                    operator = this.setDivide;
+                } else if (ops.length >= 2 && (value === 3 * ops.length)) {
+// 3 + 3 + 3 + ...
+                    operator = this.setAdd;
+                } else if (ops.length >= 2 && (value === Math.pow(3, ops.length))) {
+// 3 * 3 * 3 * ...
+                    operator = this.setMultiply;
+                } else {
+                    throw new Error("Unsupported operation (code "+ops.length+","+value+")");
+                }
+
+                Point.prototype.operands = []; // reset
+                return operator.apply(this, ops);
+            }
+        });
+
+//Complex
+        function Complex(_x,_y){
+            this.re=_x;
+            this.i=_y;
+        };
+
+        Complex.prototype.modul = function(){
+            return Math.sqrt(this.re*this.re+this.i*this.i);
+        };
+        Complex.prototype.r =Complex.prototype.modul;
+        Complex.prototype.fi = function(){
+            if(this.re>0){
+                return Math.atan(this.i/this.re);
+            }else if(this.re>0){
+                return Math.PI+Math.atan(this.i/this.re);
+            }else if(this.i>0){
+                return Math.PI/2;
+            }else if(this.i<0){
+                return -Math.PI/2;
+            }else{
+                //re=i=0 nie ma jak obliczyć kąta
+                return 0;
+            }
+
+        };
+        Complex.prototype.sprz = function(){
+            return new Complex(this.re,-this.i);
+        };
+        Complex.prototype.clone = function(){
+            return new Complex(this.re,this.i);
+        };
+        Complex.prototype.operands=[];
+
+        Complex.prototype.valueOf =function () {
+            this.operands.push(this);
+            return 3;
+        };
+        Complex.prototype.toString =function () {
+            return "{"+this.re+","+this.i+"i}";
+        };
+
+        Complex.prototype.setAdd=function(){
+            this.re=0;
+            this.i=0;
+            for(var i=0;i<arguments.length;i++){
+                this.re+=arguments[i].re;
+                this.i+=arguments[i].i;
+            }
+        };
+        Complex.prototype.setMultiply=function(){
+            this.re=arguments[0].re;
+            this.i=arguments[0].i;
+            for(var i=1;i<arguments.length;i++){
+                var tmp=(this.re*arguments[i].re)-(this.i*arguments[i].i);
+                this.i=(this.re*arguments[i].i)+(this.i*arguments[i].re);
+                this.re=tmp;
+            }
+
+        };
+        Complex.prototype.setDivide=function(a,b){
+            this.re=(a.re*b.re+a.i*b.i)/(b.re* b.re+ b.i* b.i);
+                this.i=(-a.re* b.i+ b.re* a.i)/(b.re* b.re+ b.i* b.i);
+
+        };
+        Complex.prototype.setSubtract=function(a,b){
+            this.re= a.re- b.re;
+            this.i= a.i- b.i;
+        };
+
+        Object.defineProperty(Complex.prototype, "_", {
+            set: function (value) {
+                var ops = Complex.prototype.operands;
+                var operator;
+                if (ops.length === 2 && value === 0) { // 3 - 3
+                    operator = this.setSubtract;
+                } else if (ops.length === 2 && value === 1) { // 3 / 3
+                    operator = this.setDivide;
+                } else if (ops.length >= 2 && (value === 3 * ops.length)) {
+// 3 + 3 + 3 + ...
+                    operator = this.setAdd;
+                } else if (ops.length >= 2 && (value === Math.pow(3, ops.length))) {
+// 3 * 3 * 3 * ...
+                    operator = this.setMultiply;
+                } else {
+                    throw new Error("Unsupported operation (code "+ops.length+","+value+")");
+                }
+
+                Complex.prototype.operands = []; // reset
+                return operator.apply(this, ops);
+            }
+        });
+
+
+
+        function Kat(_kat){
+            this.kat=_kat;
+            this.add=function(akat){
+                this.kat+=akat;
+                while(this.kat>(2*Math.PI)) this.kat-=Math.PI*2;
+                while(this.kat<0) this.kat+=Math.PI*2;
+            };
+            this.val=function(){
+                return this.kat;
+            }
+        }
+
+        function Punkt(_x,_y){
+            this.x=_x;
+            this.y=_y;
+        }
+
+        function dl(x1,y1,x2,y2){
+            return Math.sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1));
+        }
+        function rgb(r, g, b){
+            return "rgb("+Math.floor(r)+","+Math.floor(g)+","+Math.floor(b)+")";
+        }
+
+        var click=false;
+        var startx,starty;
+        var kurx,kury;
+
+        function MouseMove(e){
+            if(click) {
+                kurx = e.pageX - gf.canvas.offsetLeft;
+                kury = e.pageY - gf.canvas.offsetTop;
+                RePaint();
+
+            }
+        }
+        function ClickOn(e){
+            //var x=e.pageX - canvas2.offsetLeft;
+            //var y=e.pageY - canvas2.offsetTop;
+            startx=e.pageX - gf.canvas.offsetLeft;
+            starty=e.pageY - gf.canvas.offsetTop;
+            kurx=startx;
+            kury=starty;
+            click=true;
+            RePaint();
+        }
+        var stany=[];
+        function ClickOff(e){
+            if(click) {
+                //var x=e.pageX - canvas2.offsetLeft;
+                //var y=e.pageY - canvas2.offsetTop;
+                if(startx>kurx){
+                    var tmp=startx;
+                    startx=kurx;
+                    kurx=tmp;
+                }
+                if(starty>kury){
+                    var tmp=starty;
+                    starty=kury;
+                    kury=tmp;
+
+                }
+                var nx1=x1+(startx)*dx;
+
+                var nx2=x1+(kurx)*dx;
+                if(nx1<x1) nx1=x1;
+                if(nx1>x2) nx1=x2;
+                if(nx2<x1) nx2=x1;
+                if(nx2>x2) nx2=x2;
+                var ny1=y1+((starty))*dy;
+                var ny2=y1+((kury))*dy;
+
+                if(ny1>y2) ny1=y2;
+                if(ny1<y1) ny1=y1;
+                if(ny2>y2) ny2=y2;
+                if(ny2<y1) ny2=y1;
+                click = false;
+                if(startx==kurx || starty==kury) return;
+                stany.push({a1:x1,a2:x2,x1:y2,x2:y1});
+                x1=nx1;
+                x2=nx2;
+                y2=ny2;
+                y1=ny1;
+
+                RePaint();
+            }
+        }
+
+        function Cofnij(){
+            if(stany.length<1) return;
+            var s=stany.pop();
+            x1= s.a1;
+            x2= s.a2;
+            y1= s.x2;
+            y2= s.x1;
+            RePaint();
+        }
+        function LiczIteracje(k, x, y, c, R2){
+            var i=0;
+            var x2=x*x;
+            var y2=y*y;
+            while(i<k){
+                if((x2+y2)>R2) return false;
+                y=2*x*y+ c.i;
+                x=x2-y2+ c.re;
+                i++;
+                x2=x*x;
+                y2=y*y;
+            }
+            return true;
+        }
+        var RePaint = function (){
+            document.getElementById("c_out").textContent= cr+", "+ci+"i";
+            gf.setSize(MainWidth,MainHeight);
+            gf.clearRect(0, 0, gf.width, gf.height);
+
+            var c=new Complex(cr,ci);
+            //console.log(c);
+
+
+            dx=(x2-x1)/gf.width;
+            dy=(y2-y1)/gf.height;
+            //rysujemy iteracje
+            gf.startPointMode();
+            var R2=Math.pow(Math.max(c.modul(),2),2);
+            for(var k=1;k<=Stopien;k++){
+                for(var x=0;x<gf.width;x++){
+                    var xz=x1+dx*x;
+                    for(var y=0;y<gf.height;y++){
+                        var yz=y1+dy*y;
+
+                        if(LiczIteracje(k,xz,yz,c,R2)) gf.drawPoint(x,y,255*((k+1)%2),255*((k+1)%2),255*((k+1)%2),255);
+                    }
+                }
+            }
+
+
+            gf.endPointMode();
+            if(click){
+                gf.moveTo(startx,starty);
+                gf.lineTo(kurx,starty);
+                gf.lineTo(kurx,kury);
+                gf.lineTo(startx,kury);
+                gf.lineTo(startx,starty);
+                gf.stroke();
+            }
+
+        };
+
+        function StopienUp(){
+            Stopien++;
+            ReStopien();
+        }
+        function StopienDown(){
+            Stopien--;
+            Stopien=Stopien<1?1:Stopien;
+            ReStopien();
+        }
+        function ReStopien(){
+            RePaint();
+            document.getElementById("StopienOut").textContent=Stopien;
+        }
+        window.onload = function() {
+            gf=new DelorGraph(document.getElementById("drawingCanvas"));
+            //canvas = document.getElementById("drawingCanvas");
+            //context = canvas.getContext("2d");
+            gf.canvas.onmousedown=ClickOn;
+            gf.canvas.onmouseup=ClickOff;
+            gf.canvas.onmousemove=MouseMove;
+
+
+            document.getElementById("xsize").onchange = function(){
+                MainWidth=this.value;
+                document.getElementById("sizeout").textContent=Math.floor(MainWidth)+"x"+Math.floor(MainHeight);
+                RePaint();
+            };
+            document.getElementById("ysize").onchange = function(){
+                MainHeight=this.value;
+                document.getElementById("sizeout").textContent=Math.floor(MainWidth)+"x"+Math.floor(MainHeight);
+                RePaint();
+            };
+            document.getElementById("cre").onchange = function(){
+                cr=Number(this.value);
+                //document.getElementById("c_out").textContent= cre+","+ci+"i";
+                RePaint();
+            };
+            document.getElementById("cim").onchange = function(){
+                ci=Number(this.value);
+
+                RePaint();
+            };
+            ReStopien();
+        };
+
+    </script>
+</head>
+<body>
+<div>
+    <button onclick="StopienUp()">+</button> <button onclick="StopienDown()">-</button> Stopien: <span id="StopienOut">1</span><br>
+    <div class="linia">
+        <input type="range" id="xsize" min="400" max="2000" value="800" step="1" >
+        <input type="range" id="ysize" min="400" max="2000" value="800" step="1" >
+        Rozmiar obrazu: (<span id="sizeout">800x800</span>)<br>
+
+    </div>
+    <div>
+        Przekształcenie: z → z<sup>2</sup> + c<br>
+    c.re <input type="range" id="cre" min="-2" max="2" value="0" step="0.1" > c.im <input type="range" id="cim" min="-2" max="2" value="1" step="0.1" > c=(<span id="c_out"></span>)<br>
+    </div>
+</div>
+<button onclick="Cofnij()">Cofnij</button><br>
+<canvas id="drawingCanvas" width="800" height="800"></canvas>
+</body>
+</html>
