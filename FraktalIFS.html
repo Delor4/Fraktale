@@ -67,6 +67,22 @@
         przeksztalcenia[6]=[new Przekształcenie(0.382, 0 ,0 ,0.382, 0.3072, 0.6190),new Przekształcenie(0.382, 0 ,0 ,0.382, 0.6033, 0.4044),new Przekształcenie(0.382, 0 ,0 ,0.382, 0.0139, 0.4044),new Przekształcenie(0.382, 0 ,0 ,0.382, 0.1253, 0.0595),new Przekształcenie(0.382, 0 ,0 ,0.382, 0.4920, 0.0595)];
         przeksztalcenia[7]=[new Przekształcenie(0.195, -0.488 ,0.344 ,0.443, 0.4431, 0.2452),new Przekształcenie(0.462, 0.414 ,-0.252 ,0.361, 0.2511, 0.5692),new Przekształcenie(-0.058, -0.07 ,0.453 ,-0.111, 0.5976, 0.0969),new Przekształcenie(-0.035, 0.07 ,-0.469 ,-0.022, 0.4884, 0.5069),new Przekształcenie(-0.637, 0 ,0 ,0.501, 0.8562, 0.2513)];
         przeksztalcenia[8]=[new Przekształcenie(0.849, 0.037 , -0.037 ,0.849, 0.075, 0.1830),new Przekształcenie(0.197, -0.226 ,0.226 ,0.169, 0.4, 0.049),new Przekształcenie(-0.15, 0.283 ,0.26 ,0.237, 0.575, -0.084),new Przekształcenie(0, 0 ,0 ,0.16, 0.5, 0)];
+        /*przeksztalcenia[8]=[
+         new Przekształcenie(-0.4, 0 , -0.4 , 0, -1, -0.1),
+         new Przekształcenie(0.76, 0.4 ,0.4 ,-0.7, 0, 0)
+         ];
+         */
+
+        przeksztalcenia[9]=[
+            new Przekształcenie(-0.67,  -0.02,  -0.18 ,  0.81,   0,   0.1),
+            new Przekształcenie(0.4 ,    0.4,    -0.1 ,   0.4,   0,   0),
+            new Przekształcenie(-0.4,   -0.4,   -0.1 ,   0.4,    0,   0),
+            new Przekształcenie(-0.1,   0 ,     0.44,    0.44,   0,   -0.02)
+        ];
+
+        poprawki=[];
+        var tmp=28/22;
+        poprawki[9]={scalex:tmp,scaley:tmp,trx:4/10,try:1/10};
         function FraktalShow(){
             //ReCalculate();
             RePaint();
@@ -80,7 +96,7 @@
             return "rgb("+Math.floor(r)+","+Math.floor(g)+","+Math.floor(b)+")";
         }
 
-        function policzPrzekszt(prz,St,Kszt,przek,width){
+        function policzPrzekszt(prz,St,Kszt,przek,width,pop){
             //console.log("policzPrzekszt",prz,St,Kszt,przek,width);
             var ksz=[];
             for(var i=0;i<Kszt.length;i++){
@@ -88,20 +104,20 @@
                 var py=(Kszt[i].y*prz.d)+(Kszt[i].x*prz.c)+(prz.f);
                 ksz[i]=new Punkt(px,py);
             }
-            RysujIFS(St,ksz,przek,width)
+            RysujIFS(St,ksz,przek,width,pop)
         }
-        function RysujIFS(St,Kszt,przek,width){
+        function RysujIFS(St,Kszt,przek,width,pop){
             //console.log("RysujIFS",St,Kszt,przek,width);
             St--;
             if(St>0){
                 for(var prz=0;prz<przek.length;prz++){
-                    policzPrzekszt(przek[prz],St,Kszt,przek,width);
+                    policzPrzekszt(przek[prz],St,Kszt,przek,width,pop);
                 }
             }else{
                 context.beginPath();
-                context.moveTo(Kszt[0].x*width,width-(Kszt[0].y*width));
+                context.moveTo((Kszt[0].x+pop.trx)*width*pop.scalex,width-((Kszt[0].y+pop.try)*width*pop.scaley));
                 for(var i=1;i<Kszt.length;i++){
-                    context.lineTo(Kszt[i].x*width,width-(Kszt[i].y*width));
+                    context.lineTo((Kszt[i].x+pop.trx)*width*pop.scalex,width-((Kszt[i].y+pop.try)*width*pop.scaley));
                 }
                 context.closePath();
                 context.stroke();
@@ -123,7 +139,16 @@
             context.imageSmoothingEnabled=false;
             //RysujWzor(context,fraktal[Stopien].katy,x1,y1,x2,y2,wspx,wspy);
             var ksz=ksztalty[Ksztalt];
-            RysujIFS(Stopien,ksz,przeksztalcenia[Przeksztalcenie],canvas.width);
+
+            var pop;
+            if(poprawki[Przeksztalcenie]){
+                pop=poprawki[Przeksztalcenie];
+                //context.scale(poprawki[Przeksztalcenie].scalex,poprawki[Przeksztalcenie].scaley);
+                //context.translate(poprawki[Przeksztalcenie].trx*canvas.width,poprawki[Przeksztalcenie].try*canvas.height);
+            }else{
+                pop={scalex:1,scaley:1,trx:0,try:0};
+            }
+            RysujIFS(Stopien,ksz,przeksztalcenia[Przeksztalcenie],canvas.width,pop);
 
             //context.restore();
             //		context.lineWidth=Odstep;
@@ -208,6 +233,9 @@
             document.getElementById("pr9").onchange = function(){
                 if(this.checked) Przeksztalcenie=8;
             };
+            document.getElementById("pr10").onchange = function(){
+                if(this.checked) Przeksztalcenie=9;
+            };
             //RePaint();
 
 
@@ -240,6 +268,7 @@
         <input id="pr7" name="przekszt" type="radio">Kryształek 2<br>
         <input id="pr8" name="przekszt" type="radio">Drzewo<br>
         <input id="pr9" name="przekszt" type="radio">Paprotka Barnsleya<br>
+        <input id="pr10" name="przekszt" type="radio">Choinka<br>
     </div>
 
 </div>
