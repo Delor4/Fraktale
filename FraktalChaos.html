@@ -58,6 +58,7 @@
         var ksztalt=[new Punkt(0,0),new Punkt(1,1)];
 
         var przeksztalcenia=[];
+        var poprawki=[];
         przeksztalcenia[0]=[new Przekształcenie(0.5, 0 ,0 ,0.5, 0, 0, 0.333),new Przekształcenie(0.5, 0 ,0 ,0.5, 0.5, 0, 0.333),new Przekształcenie(0.5, 0 ,0 ,0.5, 0, 0.5, 0.334)];
         przeksztalcenia[1]=[new Przekształcenie(0, -0.5 ,0.5 ,0, 0.5, 0, 0.333),new Przekształcenie(0, 0.5 , -0.5 ,0, 0.5, 0.5, 0.333),new Przekształcenie(0.5, 0 ,0 , 0.5, 0.25, 0.5, 0.334)];
         przeksztalcenia[2]=[new Przekształcenie(0, 0.577 , -0.577 ,0, 0.0951, 0.5893, 0.333),new Przekształcenie(0, 0.577 , -0.577 ,0, 0.4413, 0.7893, 0.333),new Przekształcenie(0, 0.577 , -0.577 ,0, 0.0952, 0.9893, 0.333)];
@@ -77,7 +78,12 @@
             new Przekształcenie(-0.4, 0 , 0 , -0.4, -1, 0.1, 0.18),
             new Przekształcenie(0.76, -0.4 ,0.4 ,0.76, 0, 0, 0.82)
         ];
-        poprawki=[];
+        przeksztalcenia[11]=[
+            new Przekształcenie(0.8, -0.25 ,  0.68 , 0.8,  0.05, 0.12, 0.5),
+            new Przekształcenie(0.8,  0.25 , -0.68 , 0.8, -0.05, 0.12, 0.5)
+        ];
+        poprawki[11]={scalex:1/2,scaley:1/2,trx:1,try:4/10};
+
         var tmp=28/22;
         poprawki[9]={scalex:tmp,scaley:tmp,trx:4/10,try:1/10};
         poprawki[10]={scalex:1/1.7,scaley:1/1.7,trx:41/34,try:13/13};
@@ -214,6 +220,10 @@
                 if(this.checked) Przeksztalcenie=10;
                 needClean=true;
             };
+            document.getElementById("pr12").onchange = function(){
+                if(this.checked) Przeksztalcenie=11;
+                needClean=true;
+            };
             //RePaint();
 
 
@@ -236,11 +246,14 @@
         <input id="pr4" name="przekszt" type="radio">Labirynt Cantora<br>
         <input id="pr5" name="przekszt" type="radio">Gałązka<br>
         <input id="pr6" name="przekszt" type="radio">Kryształek 1<br>
+    </div>
+    <div class="linia">
         <input id="pr7" name="przekszt" type="radio">Kryształek 2<br>
         <input id="pr8" name="przekszt" type="radio">Drzewo<br>
         <input id="pr9" name="przekszt" type="radio">Paprotka Barnsleya<br>
         <input id="pr10" name="przekszt" type="radio">Choinka<br>
         <input id="pr11" name="przekszt" type="radio">Spirala<br>
+        <input id="pr12" name="przekszt" type="radio">Bazia<br>
     </div>
 
 </div>

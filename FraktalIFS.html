@@ -54,6 +54,7 @@
             this.f=_f;
         }
         var ksztalty=[];
+        var poprawki=[];
         ksztalty[0]=[new Punkt(0,1),new Punkt(0.5,0),new Punkt(1,1)];
         ksztalty[1]=[new Punkt(0,1),new Punkt(0,0),new Punkt(1,0),new Punkt(1,1)];
 
@@ -67,11 +68,6 @@
         przeksztalcenia[6]=[new Przekształcenie(0.382, 0 ,0 ,0.382, 0.3072, 0.6190),new Przekształcenie(0.382, 0 ,0 ,0.382, 0.6033, 0.4044),new Przekształcenie(0.382, 0 ,0 ,0.382, 0.0139, 0.4044),new Przekształcenie(0.382, 0 ,0 ,0.382, 0.1253, 0.0595),new Przekształcenie(0.382, 0 ,0 ,0.382, 0.4920, 0.0595)];
         przeksztalcenia[7]=[new Przekształcenie(0.195, -0.488 ,0.344 ,0.443, 0.4431, 0.2452),new Przekształcenie(0.462, 0.414 ,-0.252 ,0.361, 0.2511, 0.5692),new Przekształcenie(-0.058, -0.07 ,0.453 ,-0.111, 0.5976, 0.0969),new Przekształcenie(-0.035, 0.07 ,-0.469 ,-0.022, 0.4884, 0.5069),new Przekształcenie(-0.637, 0 ,0 ,0.501, 0.8562, 0.2513)];
         przeksztalcenia[8]=[new Przekształcenie(0.849, 0.037 , -0.037 ,0.849, 0.075, 0.1830),new Przekształcenie(0.197, -0.226 ,0.226 ,0.169, 0.4, 0.049),new Przekształcenie(-0.15, 0.283 ,0.26 ,0.237, 0.575, -0.084),new Przekształcenie(0, 0 ,0 ,0.16, 0.5, 0)];
-        przeksztalcenia[10]=[
-         new Przekształcenie(-0.4, 0 , 0 , -0.4, -1, 0.1),
-         new Przekształcenie(0.76, -0.4 ,0.4 ,0.76, 0, 0)
-         ];
-
 
         przeksztalcenia[9]=[
             new Przekształcenie(-0.67,  -0.02,  -0.18 ,  0.81,   0,   0.1),
@@ -79,11 +75,18 @@
             new Przekształcenie(-0.4,   -0.4,   -0.1 ,   0.4,    0,   0),
             new Przekształcenie(-0.1,   0 ,     0.44,    0.44,   0,   -0.02)
         ];
-
-        poprawki=[];
         var tmp=28/22;
         poprawki[9]={scalex:tmp,scaley:tmp,trx:4/10,try:1/10};
+        przeksztalcenia[10]=[
+            new Przekształcenie(-0.4, 0 , 0 , -0.4, -1, 0.1),
+            new Przekształcenie(0.76, -0.4 ,0.4 ,0.76, 0, 0)
+        ];
         poprawki[10]={scalex:1/1.7,scaley:1/1.7,trx:41/34,try:13/13};
+        przeksztalcenia[11]=[
+            new Przekształcenie(0.8, -0.25 ,  0.68 , 0.8,  0.05, 0.12),
+            new Przekształcenie(0.8,  0.25 , -0.68 , 0.8, -0.05, 0.12)
+        ];
+        poprawki[11]={scalex:1/2,scaley:1/2,trx:1,try:4/10};
         function FraktalShow(){
             //ReCalculate();
             RePaint();
@@ -240,6 +243,10 @@
             document.getElementById("pr11").onchange = function(){
                 if(this.checked) Przeksztalcenie=10;
             };
+            /*document.getElementById("pr12").onchange = function(){
+                if(this.checked) Przeksztalcenie=11;
+            };
+            */
             //RePaint();
 
 
@@ -251,7 +258,7 @@
 <div>
     <div class="linia">
         <button onclick="StopienUp()">+</button> <button onclick="StopienDown()">-</button> Stopien: <span id="StopienOut">1</span><br>
-        <input type="range" id="xsize" min="400" max="2000" value="800" step="1" >
+        <input type="range" id="xsize" min="400" max="2000" value="800" step="1" ><br>
         Rozmiar obrazu: (<span id="sizeout">800x800</span>)<br>
 
     </div>
@@ -269,11 +276,14 @@
         <input id="pr4" name="przekszt" type="radio">Labirynt Cantora<br>
         <input id="pr5" name="przekszt" type="radio">Gałązka<br>
         <input id="pr6" name="przekszt" type="radio">Kryształek 1<br>
+    </div>
+    <div class="linia">
         <input id="pr7" name="przekszt" type="radio">Kryształek 2<br>
         <input id="pr8" name="przekszt" type="radio">Drzewo<br>
         <input id="pr9" name="przekszt" type="radio">Paprotka Barnsleya<br>
         <input id="pr10" name="przekszt" type="radio">Choinka<br>
         <input id="pr11" name="przekszt" type="radio">Spirala<br>
+        <br>
     </div>
 
 </div>
