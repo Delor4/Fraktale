@@ -216,12 +216,14 @@
         var click=false;
         var startx,starty;
         var kurx,kury;
+        var ostartx,ostarty;
+        var okurx,okury;
 
         function MouseMove(e){
             if(click) {
                 kurx = e.pageX - gf.canvas.offsetLeft;
                 kury = e.pageY - gf.canvas.offsetTop;
-                RePaint();
+                rePaint2();
 
             }
         }
@@ -233,7 +235,11 @@
             kurx=startx;
             kury=starty;
             click=true;
-            RePaint();
+            ostartx=startx;
+            ostarty=starty;
+            okurx=kurx;
+            okury=kury;
+            rePaint2();
         }
         var stany=[];
         function ClickOff(e){
@@ -266,7 +272,9 @@
                 if(ny2>y2) ny2=y2;
                 if(ny2<y1) ny2=y1;
                 click = false;
-                if(startx==kurx || starty==kury) return;
+                if(startx==kurx || starty==kury){
+                    rePaint2();
+                    return;}
                 stany.push({a1:x1,a2:x2,x1:y2,x2:y1});
                 x1=nx1;
                 x2=nx2;
@@ -287,20 +295,7 @@
             RePaint();
         }
         function LiczIteracje(rec, imc ){
-            /*
-             var re=rec;
-             var im=imc;
-             //console.log(re,im);
-             for(var j=0;j<=(Stopien);j++){
-             var re2=re*re;
-             var im2=im*im;
-             //console.log(re2+im2);
-             if((re2+im2)>8) return false;
-             im=2*re*im+rec;
-             re=re2-im2+rec;
-             }
-             return true;
-             */
+
             var c=new Complex(rec,imc);
             var z=new Complex(rec,imc);
             for(var j=0;j<=(Stopien);j++){
@@ -319,12 +314,7 @@
 
             dx=(x2-x1)/gf.width;
             dy=(y2-y1)/gf.height;
-            //rysujemy iteracje
-            /*if(sposobRys==1) {
-             gf.rect(0,0,gf.width,gf.height);
-             gf.fillStyle=(Stopien%2)==1?"#000000":"#ffffff";
-             gf.fill();
-             }*/
+
             gf.startPointMode();
 
             for(var x=0;x<gf.width;x++){
@@ -333,26 +323,32 @@
                     var yz=y1+dy*y;
                     var f=LiczIteracje(xz,yz);
                     if(sposobRys==0 && f==-1) gf.drawPoint(x,y,0,0,0,255);
-                    if(sposobRys==1) gf.drawPoint(x,y,0,0,0,(f%2)==0?255:0);
-                    if(sposobRys==2) gf.drawPoint(x,y,0,0,0,
-                            f==-1?255:255/(Stopien+2-f));
+                    if(sposobRys==1) gf.drawPoint(x,y,(f%2)==1?255:0,(f%2)==1?255:0,(f%2)==1?255:0,255);
+                    if(sposobRys==2) gf.drawPoint(x,y,f==-1?0:255-255/(Stopien+2-f),f==-1?0:255-255/(Stopien+2-f),f==-1?0:255-255/(Stopien+2-f),
+                            255);
                 }
             }
 
 
 
             gf.endPointMode();
-            if(click){
-                gf.moveTo(startx,starty);
-                gf.lineTo(kurx,starty);
-                gf.lineTo(kurx,kury);
-                gf.lineTo(startx,kury);
-                gf.lineTo(startx,starty);
-                gf.stroke();
-            }
 
         };
+        function rePaint2(){
 
+            if(click){
+                gf.startPointMode();
+                gf.invRect(ostartx,ostarty,okurx-ostartx,okury-ostarty);
+                gf.invRect(startx,starty,kurx-startx,kury-starty);
+                gf.endPointMode();
+                ostartx=startx;
+                ostarty=starty;
+                okurx=kurx;
+                okury=kury;
+
+            }
+
+        }
         function StopienUp(){
             Stopien++;
             ReStopien();

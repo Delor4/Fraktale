@@ -216,12 +216,14 @@
         var click=false;
         var startx,starty;
         var kurx,kury;
+        var ostartx,ostarty;
+        var okurx,okury;
 
         function MouseMove(e){
             if(click) {
                 kurx = e.pageX - gf.canvas.offsetLeft;
                 kury = e.pageY - gf.canvas.offsetTop;
-                RePaint();
+                rePaint2();
 
             }
         }
@@ -232,8 +234,12 @@
             starty=e.pageY - gf.canvas.offsetTop;
             kurx=startx;
             kury=starty;
+            ostartx=startx;
+            ostarty=starty;
+            okurx=kurx;
+            okury=kury;
             click=true;
-            RePaint();
+            rePaint2();
         }
         var stany=[];
         function ClickOff(e){
@@ -266,7 +272,7 @@
                 if(ny2>y2) ny2=y2;
                 if(ny2<y1) ny2=y1;
                 click = false;
-                if(startx==kurx || starty==kury) return;
+                if(startx==kurx || starty==kury) return rePaint2();
                 stany.push({a1:x1,a2:x2,x1:y2,x2:y1});
                 x1=nx1;
                 x2=nx2;
@@ -323,10 +329,10 @@
 
                         if(LiczIteracje(k,xz,yz,c,R2)){
                             if(sposobRys==0) gf.drawPoint(x,y,255*((k+1)%2),255*((k+1)%2),255*((k+1)%2),255);
-                            else if(sposobRys==1) gf.drawPoint(x,y,0,0,0,255/(Stopien-k));
+                            else if(sposobRys==1) gf.drawPoint(x,y,255-255/(Stopien-k),255-255/(Stopien-k),255-255/(Stopien-k),255);
                             else if(sposobRys==2){
                                 if(k==Stopien) gf.drawPoint(x,y,0,0,0,255);
-                                else gf.drawPoint(x,y,0,0,0,0);
+                                else gf.drawPoint(x,y,255,255,255,255);
 
                             }
                         }
@@ -336,17 +342,23 @@
 
 
             gf.endPointMode();
-            if(click){
-                gf.moveTo(startx,starty);
-                gf.lineTo(kurx,starty);
-                gf.lineTo(kurx,kury);
-                gf.lineTo(startx,kury);
-                gf.lineTo(startx,starty);
-                gf.stroke();
-            }
 
         };
+        function rePaint2(){
 
+            if(click){
+                gf.startPointMode();
+                gf.invRect(ostartx,ostarty,okurx-ostartx,okury-ostarty);
+                gf.invRect(startx,starty,kurx-startx,kury-starty);
+                gf.endPointMode();
+                ostartx=startx;
+                ostarty=starty;
+                okurx=kurx;
+                okury=kury;
+
+            }
+
+        }
         function StopienUp(){
             Stopien++;
             ReStopien();

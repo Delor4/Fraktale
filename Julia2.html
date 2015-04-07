@@ -239,12 +239,14 @@
         var click=false;
         var startx,starty;
         var kurx,kury;
+        var ostartx,ostarty;
+        var okurx,okury;
 
         function MouseMove(e){
             if(click) {
                 kurx = e.pageX - gf.canvas.offsetLeft;
                 kury = e.pageY - gf.canvas.offsetTop;
-                RePaint();
+                rePaint2();
 
             }
         }
@@ -255,8 +257,12 @@
             starty=e.pageY - gf.canvas.offsetTop;
             kurx=startx;
             kury=starty;
+            ostartx=startx;
+            ostarty=starty;
+            okurx=kurx;
+            okury=kury;
             click=true;
-            RePaint();
+            rePaint2();
         }
         var stany=[];
         function ClickOff(e){
@@ -289,7 +295,7 @@
                 if(ny2>y2) ny2=y2;
                 if(ny2<y1) ny2=y1;
                 click = false;
-                if(startx==kurx || starty==kury) return;
+                if(startx==kurx || starty==kury) return rePaint2();
                 stany.push({a1:x1,a2:x2,x1:y2,x2:y1});
                 x1=nx1;
                 x2=nx2;
@@ -327,7 +333,7 @@
             gf.startPointMode();
             var z=new Complex(0.25,0);
             var last=0;
-            for(var i=1;i<10000;i++){
+            for(var i=1;i<100000;i++){
                 z._=z-c;
                 z=z.sqrt();
                   if(i==1){
@@ -343,17 +349,24 @@
             }
 
             gf.endPointMode();
-            if(click){
-                gf.moveTo(startx,starty);
-                gf.lineTo(kurx,starty);
-                gf.lineTo(kurx,kury);
-                gf.lineTo(startx,kury);
-                gf.lineTo(startx,starty);
-                gf.stroke();
-            }
+
             modified=false;
         };
+        function rePaint2(){
 
+            if(click){
+                gf.startPointMode();
+                gf.invRect(ostartx,ostarty,okurx-ostartx,okury-ostarty);
+                gf.invRect(startx,starty,kurx-startx,kury-starty);
+                gf.endPointMode();
+                ostartx=startx;
+                ostarty=starty;
+                okurx=kurx;
+                okury=kury;
+
+            }
+
+        }
         window.onload = function() {
             gf=new DelorGraph(document.getElementById("drawingCanvas"));
             //canvas = document.getElementById("drawingCanvas");
